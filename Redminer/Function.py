@@ -29,7 +29,28 @@ def check_credential_complete(credential):
     else:
         return True
     
-def search_latest_attribute(select_date, attribute_change_list):
+def search_start_datetime(issue_journals_dict):
+    """
+    Return the earliest date of all changes of attributes.
+    It may be the starting date of a project as well.
+    """
+    current_datetime = datetime.now()
+    start_datetime = current_datetime
+     
+    for key,value in issue_journals_dict.iteritems():
+        for k,v in value.iteritems():
+            first_datetime = v[0][0]
+            if first_datetime < start_datetime:
+                start_datetime = first_datetime
+    
+    start_date_string = start_datetime.strftime('%Y-%m-%d')
+    
+    if start_datetime == current_datetime:
+        return False
+    else:
+        return start_date_string
+    
+def search_latest_attribute(select_datetime, attribute_change_list):
     """
     Return the latest attribute of issue in the select date and time from the list.
  
@@ -47,20 +68,17 @@ def search_latest_attribute(select_date, attribute_change_list):
     
     for status_change_item in attribute_change_list:
         status_change_date = status_change_item[0].date()
-        if status_change_date < select_date:
+#         status_change_date = status_change_item[0]
+        if status_change_date < select_datetime:
             last_status_time = status_change_item[0]
             old_status = status_change_item[1]
             new_status = status_change_item[2]
-#             print "status_change_date:%s < select_date:%s | new_status:%s" %(status_change_date, select_date, new_status)
         else:
             break
     
     if new_status:           
-#         print "[%s] : %d -> %d" %(last_status_time, old_status, new_status) 
-#         print new_status
         return new_status
     else:
-#         print "Not found"
         return False
 
 def build_issue_journals_for_project(project_num, personal_key, total_issue_num = None):
@@ -648,6 +666,28 @@ if __name__ == '__main__':
 #     print build_issue_journals_for_project(292, "92a0618f19ec413438e4b5b3a3847ce1cd88c67a",300)
 #     print request_category_dict(291, "92a0618f19ec413438e4b5b3a3847ce1cd88c67a")
 #     print request_issue_journals(29222, "92a0618f19ec413438e4b5b3a3847ce1cd88c67a")
-    check_credential = timeout.add_timeout(check_credential, 100)
-    print check_credential
+    
+    
+    issue_travel_dict = {
+                         21717:{
+                                'severity_changes': [['12/11/2013_02:32:36', 'Not Defined', 'S3']], 
+                                'status_changes': [['12/11/2013_02:32:36', 'Not Defined', '2']], 
+                                'priority_changes': [['12/11/2013_02:32:36', 'Not Defined', 'P1']], 
+                                'category_changes': [['12/11/2013_02:32:36', 'Not Defined', '352'], 
+                                                     ['10/02/2014_10:03:29', '352', '435'], 
+                                                     ['10/03/2014_10:15:14', '435', 'Not Defined'], 
+                                                     ['10/30/2014_10:10:47', 'Not Defined', '423']]
+                                },
+                         }
+         
+    from Utility import *
+    
+    new_issue_travel_dict = decode_datetime(issue_travel_dict)
+    
+    select_datetime = datetime.strptime('12 30 2013', '%m %d %Y')
+    print 'select_datetime', type(select_datetime)
+    
+    for key,value in new_issue_travel_dict[21717].iteritems():
+        print search_latest_attribute(select_datetime, value)
+        
     

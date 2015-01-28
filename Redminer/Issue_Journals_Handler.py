@@ -20,7 +20,7 @@ class Create_Issue_Journals(QtCore.QThread):
     send_message = QtCore.pyqtSignal(str)
     update_message = QtCore.pyqtSignal(str)
     send_stop = QtCore.pyqtSignal(str)
-    load_complete = QtCore.pyqtSignal(dict)
+    load_complete = QtCore.pyqtSignal()
     send_results = QtCore.pyqtSignal(dict)
     
     def __init__(self, project_id, project_name, personal_key):
@@ -65,7 +65,6 @@ class Create_Issue_Journals(QtCore.QThread):
             progress = "|=" + "="*(steps_done-1) + ">" + " "*steps_rest + "|"
             
             header = "(%d/%d) %s %s" %(index, total_issue_num, percentage, progress)
-#             print header
             
             self.update_message.emit(header)
                 
@@ -76,18 +75,14 @@ class Create_Issue_Journals(QtCore.QThread):
         
         self.send_message.emit("Start caching the result data.")
         
+        clean_cache(self.project_name)
         write_cache(issue_journals_dict, self.project_name)
         
         self.send_results.emit(issue_journals_dict)
         self.send_message.emit("Complete!\n"+"-"*18)
-                
+        self.load_complete.emit()
+        
     def stop(self):
-#         del self.personal_key
-#         del self.project_id
-#         del self.project_name
-#         del self.start_date
-#         del self.end_date
-#         del self.total_issue_num
         self.send_stop.emit("Stop by User")
         self.terminate()
 
@@ -171,9 +166,11 @@ class Filter_Issue_Journals(QtCore.QThread):
                 last_category_id = search_latest_attribute(select_datetime, value['category_changes'])
                 last_severity_name = search_latest_attribute(select_datetime, value['severity_changes'])
                 
-#                 print "last_status_id", last_status_id
-#                 print "[%s] Issus %s last_category_id %s" %(select_datetime, issue, last_category_id)
-#                 print "last_severity_name", last_severity_name
+#                 if issue == 21717:
+#                     print 'Issue number ->', issue
+#                     print 'last_status_id ->', last_status_id
+#                     print 'last_category_id ->', last_category_id
+#                     print 'last_severity_name ->', last_severity_name
                 
                 if category_id_selection and (last_category_id not in category_id_selection):
                     continue

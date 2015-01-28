@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'C:\WorkSpace\Redmine_Issue_Tracker\Redminer\Selection_Window.ui'
 #
-# Created: Mon Jan 05 17:10:18 2015
+# Created: Mon Jan 26 17:39:35 2015
 #      by: PyQt4 UI code generator 4.10.1
 #
 # WARNING! All changes made in this file will be lost!

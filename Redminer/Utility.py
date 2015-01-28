@@ -185,12 +185,8 @@ class CheckableTableWidget(QtGui.QWidget):
             checked_list.append(checked_index)
             self.column_0[checked_index].setCheckState(QtCore.Qt.Checked)
         
-#         print "checked_list", checked_list
-        
         universal_set = set(range(len(self.column_0)))
         unchecked_set = universal_set - set(checked_list)
-
-#         print "unchecked_set", unchecked_set
         
         for unchecked_index in unchecked_set:
             self.column_0[unchecked_index].setCheckState(QtCore.Qt.Unchecked)
@@ -216,34 +212,106 @@ def check_connectivity(reference):
     except urllib2.URLError:
         return False
 
-def write_cache(content, project_name, file_path = None):
-    if file_path:
-        result_dir = file_path
-    else:
-        result_dir = pathProgram() + '\\Temp'
+def write_cache(content, project_name):
+    '''
+    Write a cache to temp folder with file name "project name + created time"
+    '''
+    temp_dir = os.path.join(pathProgram(),'Temp')
     
     if '/' in project_name:
         new_project_name = project_name.replace('/', '-')
     else:
         new_project_name = project_name   
 
-    cur_time = time.strftime('%Y-%m-%d',time.localtime(time.time()))
+    cur_time = time.strftime('%Y-%m-%d,%H-%M-%S',time.localtime(time.time()))
     file_name = "%s_%s.tmp"%(new_project_name, cur_time)
-    result_path = result_dir + "\\" + file_name 
-    MyPrint("Write result to path: %s" %(result_path))
+    cache_path = temp_dir + "\\" + file_name 
+    
+    MyPrint("Write Cache to path: %s" %(cache_path))
     
     temp_content = copy.deepcopy(content)
     temp_content = encode_datetime(temp_content)
     
-    fid = open(result_path, 'w')
+    fid = open(cache_path, 'w')
     fid.write('%s'%(temp_content))
     fid.close()
+    
+    return cache_path
 
-def read_cache(project_name, file_path = None):
-    if file_path:
-        result_dir = file_path
+def read_cache(project_name):
+    '''
+    Read the local data copy based on project name, return a long string
+    '''
+    temp_dir = os.path.join(pathProgram(),'Temp')
+    
+    file_list = os.listdir(temp_dir)
+    
+    for file_name in file_list:
+        if project_name in file_name:
+            filename_found = file_name
+    
+    cache_path = temp_dir + "\\" + filename_found 
+    
+    MyPrint("Read Cache from path: %s" %(cache_path))
+    
+    fid = open(cache_path, 'r')
+    cache_content = fid.read()
+    fid.close()
+    
+    temp_content = eval(cache_content)
+    content = decode_datetime(temp_content)
+    
+    return content
+
+def check_cache(project_name):
+    '''
+    Check if there is local data copy for a certain project existing.
+    '''
+    temp_dir = os.path.join(pathProgram(),'Temp')
+    
+    file_list = os.listdir(temp_dir)
+    
+    filename_found = False
+    
+    for file_name in file_list:
+        if project_name in file_name:
+            filename_found = file_name
+    
+    if filename_found:
+        datetime_str = filename_found.strip('.tmp')
+        datetime_str = datetime_str.split('_')[1]
+        datetime_obj = datetime.strptime(datetime_str, '%Y-%m-%d,%H-%M-%S')
+        return datetime_obj
     else:
-        result_dir = pathProgram() + '\\Temp'
+        return False
+
+def clean_cache(project_name):
+    '''
+    Remove the local data copy for a certain project.
+    '''
+    temp_dir = os.path.join(pathProgram(),'Temp')
+    
+    file_list = os.listdir(temp_dir)
+    
+    filename_found = False
+    
+    for file_name in file_list:
+        if project_name in file_name:
+            filename_found = file_name
+            file_full_path = os.path.join(temp_dir,filename_found)
+            os.remove(file_full_path)
+    
+    if filename_found:
+        return True
+    else:
+        return False
+
+##-------- OLD ------------
+def read_cache_old(project_name, file_path = None):
+    if file_path:
+        temp_dir = file_path
+    else:
+        temp_dir = pathProgram() + '\\Temp'
         
     if '/' in project_name:
         new_project_name = project_name.replace('/', '-')
@@ -252,8 +320,9 @@ def read_cache(project_name, file_path = None):
     
     cur_time = time.strftime('%Y-%m-%d',time.localtime(time.time()))
     file_name = "%s_%s.tmp"%(new_project_name, cur_time)
-    cache_path = result_dir + "\\" + file_name 
+    cache_path = temp_dir + "\\" + file_name 
     MyPrint("Read Cache from path: %s" %(cache_path))
+    
     fid = open(cache_path, 'r')
     cache_content = fid.read()
     fid.close()
@@ -263,7 +332,7 @@ def read_cache(project_name, file_path = None):
     
     return temp_content
 
-def check_cache(project_name, file_path = None):
+def check_cache_old(project_name, file_path = None):
     if file_path:
         result_dir = file_path
     else:
@@ -282,8 +351,6 @@ def check_cache(project_name, file_path = None):
         return True
     else:
         return False
-
-
 
 def encode_datetime(content):
     for key_issue,value_issue in content.iteritems():

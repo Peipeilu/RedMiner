@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'C:\WorkSpace\Redmine_Issue_Tracker\Redminer\Main_Window_Intergrated_Credential.ui'
 #
-# Created: Mon Jan 05 17:10:19 2015
+# Created: Mon Jan 26 17:39:36 2015
 #      by: PyQt4 UI code generator 4.10.1
 #
 # WARNING! All changes made in this file will be lost!
