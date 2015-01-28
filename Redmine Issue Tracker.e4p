@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Project SYSTEM "Project-4.6.dtd">
+<!-- eric4 project file for project Redmine Issue Tracker -->
+<!-- Saved: 2015-01-05, 17:10:20 -->
+<!-- Copyright (C) 2015 Jeffrey Ye, cong.ye@seagate.com -->
+<Project version="4.6">
+  <Language>en</Language>
+  <ProgLanguage mixed="0">Python</ProgLanguage>
+  <ProjectType>Qt4</ProjectType>
+  <Description>A light tool to remotely track issues in Redmine</Description>
+  <Version>0.1</Version>
+  <Author>Jeffrey Ye</Author>
+  <Email>cong.ye@seagate.com</Email>
+  <Sources>
+    <Source>Main_Test.py</Source>
+    <Source>Redminer/Function.py</Source>
+    <Source>Redminer/Issue_Journals_Handler.py</Source>
+    <Source>Redminer/Main_Window.py</Source>
+    <Source>Redminer/Project_Loader.py</Source>
+    <Source>Redminer/SelectionWindow.py</Source>
+    <Source>Redminer/Ui_Main_Window.py</Source>
+    <Source>Redminer/Ui_Selection_Window.py</Source>
+    <Source>Redminer/Utility.py</Source>
+    <Source>Redminer/__init__.py</Source>
+    <Source>Redminer_Start.py</Source>
+    <Source>Redminer/Ui_Credential_Window.py</Source>
+    <Source>Redminer/Ui_About.py</Source>
+    <Source>Redminer/Ui_Main_Window_Intergrated_Credential.py</Source>
+  </Sources>
+  <Forms>
+    <Form>Redminer/Main_Window.ui</Form>
+    <Form>Redminer/Selection_Window.ui</Form>
+    <Form>Redminer/Credential_Window.ui</Form>
+    <Form>Redminer/About.ui</Form>
+    <Form>Redminer/Main_Window_Intergrated_Credential.ui</Form>
+  </Forms>
+  <Translations>
+  </Translations>
+  <Resources>
+  </Resources>
+  <Interfaces>
+  </Interfaces>
+  <Others>
+  </Others>
+  <Vcs>
+    <VcsType>None</VcsType>
+  </Vcs>
+  <FiletypeAssociations>
+    <FiletypeAssociation pattern="*.ui" type="FORMS" />
+    <FiletypeAssociation pattern="*.idl" type="INTERFACES" />
+    <FiletypeAssociation pattern="*.qm" type="TRANSLATIONS" />
+    <FiletypeAssociation pattern="*.ptl" type="SOURCES" />
+    <FiletypeAssociation pattern="*.pyw" type="SOURCES" />
+    <FiletypeAssociation pattern="*.ui.h" type="FORMS" />
+    <FiletypeAssociation pattern="*.ts" type="TRANSLATIONS" />
+    <FiletypeAssociation pattern="*.py" type="SOURCES" />
+    <FiletypeAssociation pattern="*.qrc" type="RESOURCES" />
+  </FiletypeAssociations>
+</Project>

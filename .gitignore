@@ -11,7 +11,6 @@ env/
 build/
 develop-eggs/
 dist/
-downloads/
 eggs/
 lib/
 lib64/
@@ -23,7 +22,7 @@ var/
 *.egg
 
 # PyInstaller
-#  Usually these files are written by a python script from a template
+#  Usually these files are written by a python script from a template 
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
 *.spec
@@ -64,6 +63,9 @@ target/
 .AppleDouble
 .LSOverride
 
+# Icon must end with two \r
+Icon
+
 # Thumbnails
 ._*
 
@@ -96,6 +98,20 @@ $RECYCLE.BIN/
 *.msi
 *.msm
 *.msp
-
-# Windows shortcuts
-*.lnk
+*.txt
+*.csv
+*.xlsx
+*.tmp
+*.xls
+*.cfg
+setup.py
+Setting/settings.cfg
+Redminer/Main_Window_Intergrated_Credential.ui
+Redminer_Start_noWindow.pyw
+Setting/personal_key
+Setting/Code_Monitor.py
+new_logo copy.png
+seagate.bmp
+seagate.ico
+seagate.ico
+*.tmp_bk
