@@ -115,3 +115,5 @@ seagate.bmp
 seagate.ico
 seagate.ico
 *.tmp_bk
+Redminer/Main_Window (win).ui
+Redminer/Ui_Main_Window (win).py

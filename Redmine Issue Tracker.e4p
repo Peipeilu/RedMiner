@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-4.6.dtd">
 <!-- eric4 project file for project Redmine Issue Tracker -->
-<!-- Saved: 2015-01-05, 17:10:20 -->
+<!-- Saved: 2015-01-28, 17:17:35 -->
 <!-- Copyright (C) 2015 Jeffrey Ye, cong.ye@seagate.com -->
 <Project version="4.6">
   <Language>en</Language>
@@ -12,7 +12,6 @@
   <Author>Jeffrey Ye</Author>
   <Email>cong.ye@seagate.com</Email>
   <Sources>
-    <Source>Main_Test.py</Source>
     <Source>Redminer/Function.py</Source>
     <Source>Redminer/Issue_Journals_Handler.py</Source>
     <Source>Redminer/Main_Window.py</Source>
@@ -26,13 +25,15 @@
     <Source>Redminer/Ui_Credential_Window.py</Source>
     <Source>Redminer/Ui_About.py</Source>
     <Source>Redminer/Ui_Main_Window_Intergrated_Credential.py</Source>
+    <Source>Redminer/Ui_Main_Window (win).py</Source>
   </Sources>
   <Forms>
-    <Form>Redminer/Main_Window.ui</Form>
     <Form>Redminer/Selection_Window.ui</Form>
     <Form>Redminer/Credential_Window.ui</Form>
     <Form>Redminer/About.ui</Form>
     <Form>Redminer/Main_Window_Intergrated_Credential.ui</Form>
+    <Form>Redminer/Main_Window (win).ui</Form>
+    <Form>Redminer/Main_Window.ui</Form>
   </Forms>
   <Translations>
   </Translations>

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>904</width>
-    <height>556</height>
+    <width>915</width>
+    <height>538</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -53,7 +53,7 @@
           </property>
           <property name="font">
            <font>
-            <family>Arial</family>
+            <family>Tahoma</family>
             <pointsize>8</pointsize>
             <weight>50</weight>
             <italic>false</italic>
@@ -71,7 +71,7 @@
          <widget class="QLabel" name="label_7">
           <property name="minimumSize">
            <size>
-            <width>85</width>
+            <width>95</width>
             <height>0</height>
            </size>
           </property>
@@ -83,16 +83,15 @@
           </property>
           <property name="font">
            <font>
-            <family>Arial</family>
-            <weight>50</weight>
-            <bold>false</bold>
+            <family>Tahoma</family>
+            <pointsize>9</pointsize>
            </font>
           </property>
           <property name="text">
-           <string>Project Name</string>
+           <string>Project Name  </string>
           </property>
           <property name="alignment">
-           <set>Qt::AlignCenter</set>
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
           </property>
          </widget>
         </item>
@@ -118,7 +117,8 @@
           </property>
           <property name="font">
            <font>
-            <family>Arial</family>
+            <family>Tahoma</family>
+            <pointsize>9</pointsize>
            </font>
           </property>
           <property name="sizeAdjustPolicy">
@@ -129,7 +129,7 @@
           </property>
           <item>
            <property name="text">
-            <string>  Click Here To Load Project List</string>
+            <string> Click To Load Project List</string>
            </property>
           </item>
          </widget>
@@ -138,7 +138,7 @@
          <widget class="QLabel" name="label_8">
           <property name="minimumSize">
            <size>
-            <width>85</width>
+            <width>95</width>
             <height>0</height>
            </size>
           </property>
@@ -150,14 +150,15 @@
           </property>
           <property name="font">
            <font>
-            <family>Arial</family>
+            <family>Tahoma</family>
+            <pointsize>9</pointsize>
            </font>
           </property>
           <property name="text">
-           <string>Data Source  </string>
+           <string>Data Source     </string>
           </property>
           <property name="alignment">
-           <set>Qt::AlignCenter</set>
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
           </property>
          </widget>
         </item>
@@ -183,14 +184,15 @@
           </property>
           <property name="font">
            <font>
-            <family>Arial</family>
+            <family>Tahoma</family>
+            <pointsize>9</pointsize>
            </font>
           </property>
           <property name="layoutDirection">
            <enum>Qt::LeftToRight</enum>
           </property>
           <property name="text">
-           <string>&gt; Load</string>
+           <string>Load</string>
           </property>
          </widget>
         </item>
@@ -214,15 +216,21 @@
          <widget class="QLabel" name="label_9">
           <property name="minimumSize">
            <size>
-            <width>85</width>
+            <width>95</width>
             <height>0</height>
            </size>
+          </property>
+          <property name="font">
+           <font>
+            <family>Tahoma</family>
+            <pointsize>9</pointsize>
+           </font>
           </property>
           <property name="text">
            <string>Last Copy Time</string>
           </property>
           <property name="alignment">
-           <set>Qt::AlignCenter</set>
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
           </property>
          </widget>
         </item>
@@ -256,6 +264,11 @@
             <height>25</height>
            </size>
           </property>
+          <property name="font">
+           <font>
+            <family>Tahoma</family>
+           </font>
+          </property>
           <property name="readOnly">
            <bool>true</bool>
           </property>
@@ -267,7 +280,10 @@
        <widget class="QGroupBox" name="gridGroupBox">
         <property name="font">
          <font>
-          <family>Arial</family>
+          <family>Arial Black</family>
+          <pointsize>9</pointsize>
+          <weight>50</weight>
+          <bold>false</bold>
          </font>
         </property>
         <property name="title">
@@ -303,6 +319,11 @@
              <height>30</height>
             </size>
            </property>
+           <property name="font">
+            <font>
+             <family>Tahoma</family>
+            </font>
+           </property>
            <property name="dateTime">
             <datetime>
              <hour>0</hour>
@@ -319,16 +340,15 @@
           <widget class="QLabel" name="label_2">
            <property name="font">
             <font>
-             <pointsize>8</pointsize>
-             <weight>50</weight>
-             <bold>false</bold>
+             <family>Tahoma</family>
+             <pointsize>9</pointsize>
             </font>
            </property>
            <property name="text">
-            <string>End Date</string>
+            <string>  End Date</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
            </property>
           </widget>
          </item>
@@ -336,15 +356,15 @@
           <widget class="QLabel" name="label_3">
            <property name="font">
             <font>
-             <weight>50</weight>
-             <bold>false</bold>
+             <family>Tahoma</family>
+             <pointsize>9</pointsize>
             </font>
            </property>
            <property name="text">
-            <string>Start Date</string>
+            <string>  Start Date</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
            </property>
           </widget>
          </item>
@@ -368,6 +388,11 @@
              <height>30</height>
             </size>
            </property>
+           <property name="font">
+            <font>
+             <family>Tahoma</family>
+            </font>
+           </property>
            <property name="dateTime">
             <datetime>
              <hour>0</hour>
@@ -384,14 +409,15 @@
           <widget class="QLabel" name="label_4">
            <property name="font">
             <font>
-             <pointsize>8</pointsize>
+             <family>Tahoma</family>
+             <pointsize>9</pointsize>
             </font>
            </property>
            <property name="text">
-            <string>Date Interval </string>
+            <string>  Date Interval </string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
            </property>
           </widget>
          </item>
@@ -399,6 +425,11 @@
           <layout class="QHBoxLayout" name="horizontalLayout_4">
            <item>
             <widget class="QSlider" name="horizontalSlider_accuracy">
+             <property name="font">
+              <font>
+               <family>Tahoma</family>
+              </font>
+             </property>
              <property name="maximum">
               <number>30</number>
              </property>
@@ -429,7 +460,8 @@
              </property>
              <property name="font">
               <font>
-               <pointsize>9</pointsize>
+               <family>Tahoma</family>
+               <pointsize>8</pointsize>
               </font>
              </property>
              <property name="layoutDirection">
@@ -447,6 +479,7 @@
             <widget class="QLabel" name="label_unit">
              <property name="font">
               <font>
+               <family>Tahoma</family>
                <pointsize>8</pointsize>
               </font>
              </property>
@@ -476,35 +509,28 @@
         </property>
         <property name="font">
          <font>
-          <family>Arial</family>
+          <family>Arial Black</family>
+          <pointsize>9</pointsize>
          </font>
         </property>
         <property name="title">
          <string>Filter Panel</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_2" rowstretch="1,0,0">
-         <property name="leftMargin">
-          <number>9</number>
-         </property>
-         <property name="topMargin">
-          <number>0</number>
-         </property>
-         <property name="rightMargin">
-          <number>9</number>
-         </property>
-         <property name="bottomMargin">
-          <number>5</number>
-         </property>
          <property name="horizontalSpacing">
           <number>10</number>
          </property>
          <property name="verticalSpacing">
           <number>8</number>
          </property>
+         <property name="margin">
+          <number>10</number>
+         </property>
          <item row="0" column="2">
           <widget class="QLabel" name="label_priority">
            <property name="font">
             <font>
+             <family>Tahoma</family>
              <weight>50</weight>
              <bold>false</bold>
             </font>
@@ -556,6 +582,11 @@
              <height>40</height>
             </size>
            </property>
+           <property name="font">
+            <font>
+             <family>Tahoma</family>
+            </font>
+           </property>
            <property name="text">
             <string>Select</string>
            </property>
@@ -574,6 +605,11 @@
              <width>16777215</width>
              <height>40</height>
             </size>
+           </property>
+           <property name="font">
+            <font>
+             <family>Tahoma</family>
+            </font>
            </property>
            <property name="text">
             <string>Select</string>
@@ -609,7 +645,7 @@
           <widget class="QLabel" name="label_status">
            <property name="font">
             <font>
-             <family>Arial</family>
+             <family>Tahoma</family>
              <weight>50</weight>
              <bold>false</bold>
             </font>
@@ -626,6 +662,7 @@
           <widget class="QLabel" name="label_severity">
            <property name="font">
             <font>
+             <family>Tahoma</family>
              <weight>50</weight>
              <bold>false</bold>
             </font>
@@ -651,6 +688,11 @@
              <width>16777215</width>
              <height>40</height>
             </size>
+           </property>
+           <property name="font">
+            <font>
+             <family>Tahoma</family>
+            </font>
            </property>
            <property name="text">
             <string>Select</string>
@@ -689,7 +731,8 @@
        <widget class="QGroupBox" name="horizontalGroupBox">
         <property name="font">
          <font>
-          <family>Arial</family>
+          <family>Arial Black</family>
+          <pointsize>9</pointsize>
          </font>
         </property>
         <property name="title">
@@ -725,6 +768,11 @@
              <height>40</height>
             </size>
            </property>
+           <property name="font">
+            <font>
+             <family>Tahoma</family>
+            </font>
+           </property>
            <property name="text">
             <string>Run</string>
            </property>
@@ -744,6 +792,11 @@
              <height>40</height>
             </size>
            </property>
+           <property name="font">
+            <font>
+             <family>Tahoma</family>
+            </font>
+           </property>
            <property name="text">
             <string>Stop</string>
            </property>
@@ -762,6 +815,11 @@
              <width>16777215</width>
              <height>40</height>
             </size>
+           </property>
+           <property name="font">
+            <font>
+             <family>Tahoma</family>
+            </font>
            </property>
            <property name="text">
             <string>Result</string>
@@ -803,7 +861,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>904</width>
+     <width>915</width>
      <height>21</height>
     </rect>
    </property>

@@ -307,50 +307,50 @@ def clean_cache(project_name):
         return False
 
 ##-------- OLD ------------
-def read_cache_old(project_name, file_path = None):
-    if file_path:
-        temp_dir = file_path
-    else:
-        temp_dir = pathProgram() + '\\Temp'
-        
-    if '/' in project_name:
-        new_project_name = project_name.replace('/', '-')
-    else:
-        new_project_name = project_name   
-    
-    cur_time = time.strftime('%Y-%m-%d',time.localtime(time.time()))
-    file_name = "%s_%s.tmp"%(new_project_name, cur_time)
-    cache_path = temp_dir + "\\" + file_name 
-    MyPrint("Read Cache from path: %s" %(cache_path))
-    
-    fid = open(cache_path, 'r')
-    cache_content = fid.read()
-    fid.close()
-    
-    temp_content = eval(cache_content)
-    temp_content = decode_datetime(temp_content)
-    
-    return temp_content
-
-def check_cache_old(project_name, file_path = None):
-    if file_path:
-        result_dir = file_path
-    else:
-        result_dir = pathProgram() + '\\Temp'
-        
-    if '/' in project_name:
-        new_project_name = project_name.replace('/', '-')
-    else:
-        new_project_name = project_name   
-    
-    cur_time = time.strftime('%Y-%m-%d',time.localtime(time.time()))
-    file_name = "%s_%s.tmp"%(new_project_name, cur_time)
-    cache_path = result_dir + "\\" + file_name 
-    
-    if os.path.isfile(cache_path):
-        return True
-    else:
-        return False
+# def read_cache_old(project_name, file_path = None):
+#     if file_path:
+#         temp_dir = file_path
+#     else:
+#         temp_dir = pathProgram() + '\\Temp'
+#         
+#     if '/' in project_name:
+#         new_project_name = project_name.replace('/', '-')
+#     else:
+#         new_project_name = project_name   
+#     
+#     cur_time = time.strftime('%Y-%m-%d',time.localtime(time.time()))
+#     file_name = "%s_%s.tmp"%(new_project_name, cur_time)
+#     cache_path = temp_dir + "\\" + file_name 
+#     MyPrint("Read Cache from path: %s" %(cache_path))
+#     
+#     fid = open(cache_path, 'r')
+#     cache_content = fid.read()
+#     fid.close()
+#     
+#     temp_content = eval(cache_content)
+#     temp_content = decode_datetime(temp_content)
+#     
+#     return temp_content
+# 
+# def check_cache_old(project_name, file_path = None):
+#     if file_path:
+#         result_dir = file_path
+#     else:
+#         result_dir = pathProgram() + '\\Temp'
+#         
+#     if '/' in project_name:
+#         new_project_name = project_name.replace('/', '-')
+#     else:
+#         new_project_name = project_name   
+#     
+#     cur_time = time.strftime('%Y-%m-%d',time.localtime(time.time()))
+#     file_name = "%s_%s.tmp"%(new_project_name, cur_time)
+#     cache_path = result_dir + "\\" + file_name 
+#     
+#     if os.path.isfile(cache_path):
+#         return True
+#     else:
+#         return False
 
 def encode_datetime(content):
     for key_issue,value_issue in content.iteritems():
@@ -388,7 +388,7 @@ def write_csv(content_line_lists, file_name, project_name, file_path = None):
     if file_path:
         result_dir = file_path
     else:
-        result_dir = pathProgram() + '\\Result'
+        result_dir = os.path.join(pathProgram(),'Result')
     
     if '/' in project_name:
         new_project_name = project_name.replace('/', '-')
@@ -493,7 +493,7 @@ def saveEnvironment(file_path = "",params = []):
         
     print "saveEnvironment"
     param_lines = []
-#     param_lines.append("Written\n")
+    
     index = 0
     for param in params:
         index = index + 1
@@ -514,7 +514,7 @@ def cleanEnvironment(file_path = None):
          
     os.remove(full_path)
     
-def loadEnvironment(file_path = ""):   #FIX ME
+def loadEnvironment(file_path = None):
     if file_path:
         full_path = file_path
     else:
@@ -524,7 +524,6 @@ def loadEnvironment(file_path = ""):   #FIX ME
 
     fileHandle = open ( full_path, 'r' )    
     param_line_chunk = fileHandle.read()
-#     print "param_line_chunk",param_line_chunk
     
     if not param_line_chunk:
         return False

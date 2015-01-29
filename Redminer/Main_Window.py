@@ -92,9 +92,13 @@ class MainWindow(QMainWindow, Ui_Redminer):
         '''
         self.setWindowTitle("RedMiner(Redmine Issue Tracker) %s - Produced by %s"%(__version__, __producer__))
         
-        self.icon_pending = DIRPATH + "\\pic\\pending.png"
-        self.icon_check = DIRPATH + "\\pic\\check.png"
-        self.icon_ban = DIRPATH + "\\pic\\ban.png"
+#         self.icon_pending = DIRPATH + "\\pic\\pending.png"
+#         self.icon_check = DIRPATH + "\\pic\\check.png"
+#         self.icon_ban = DIRPATH + "\\pic\\ban.png"
+
+        self.icon_pending = os.path.join(DIRPATH,"Pic","pending.png")
+        self.icon_check   = os.path.join(DIRPATH,"Pic","check.png")
+        self.icon_ban     = os.path.join(DIRPATH,"Pic","ban.png")
         
         self.ui.pushButton_status_switch.setIcon(QtGui.QIcon(self.icon_pending))
         self.ui.pushButton_category_switch.setIcon(QtGui.QIcon(self.icon_pending))
@@ -428,12 +432,12 @@ class MainWindow(QMainWindow, Ui_Redminer):
             self.ui.comboBox_project.setEnabled(True)
             self.ui.pushButton_project_load.setEnabled(True)
             self.project_journal_loading = False
-            self.ui.pushButton_project_load.setText("> Load")
+            self.ui.pushButton_project_load.setText("Load")
         else:
             self.ui.comboBox_project.setEnabled(False)
             self.ui.pushButton_project_load.setEnabled(True)
             self.project_journal_loading = True
-            self.ui.pushButton_project_load.setText("X Stop")
+            self.ui.pushButton_project_load.setText("Stop")
     
     @pyqtSignature("")
     def on_pushButton_project_load_clicked(self):   
@@ -441,6 +445,7 @@ class MainWindow(QMainWindow, Ui_Redminer):
 #             self.on_select_project()
             self.__switch_pushButton_project_load()
             self.__disable_loading_panel()
+            self.ui.pushButton_project_load.setEnabled(True)
             
             self.start_load_issue_journal()
             
@@ -915,7 +920,7 @@ class MainWindow(QMainWindow, Ui_Redminer):
         self.credential_window.close()
         saveCredential(self.personal_key)
         self.print_to_console("Credential key is set")
-        self.__enable_loading_panel()
+        self.ui.comboBox_project.setEnabled(True)
         self.ui.pushButton_project_load.setEnabled(False)
         
     def __restart_app(self):       
