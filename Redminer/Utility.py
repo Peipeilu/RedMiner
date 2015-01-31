@@ -10,7 +10,9 @@ from PyQt4 import QtGui, QtCore
 # Global Variables -------------------------------------------------------------------
 
 #Bigger number means more serious
-EventLevel = {'NORMAL':0 ,'DEBUG': 1, 'INFO': 2, 'ERROR': 3, 'FATAL': 4, 'NONE': 5}
+EventLevel = {'NORMAL':0 ,'DEBUG': 1, 'ERROR': 3, 'FATAL': 4}
+
+MinLevel = 'ERROR'
 
 # Five levels for log recording
 # Level-1:Normal *
@@ -21,7 +23,6 @@ EventLevel = {'NORMAL':0 ,'DEBUG': 1, 'INFO': 2, 'ERROR': 3, 'FATAL': 4, 'NONE':
 # Level-6:NONE *
 # ALL < DEBUG < INFO < ERROR < FATAL < NONE
 
-MinLevel = 'NORMAL'
 
 # Widgets --------------------------------------------------------------------------
 class MyComboBox(QtGui.QComboBox):
@@ -33,7 +34,6 @@ class MyComboBox(QtGui.QComboBox):
         self.buttonMode = True
         
     def onClicked(self):
-        print "Combox Box Clicked"
         self.clicked.emit()
     
     def removeClickableEventFilter(self):
@@ -53,7 +53,7 @@ class MyComboBox(QtGui.QComboBox):
                             self.clicked.emit()
                             # The developer can opt for .emit(obj) to get the object within the slot.
                             return True
-                
+
                 return False
         
         self.clickable_filter = Filter(widget)
@@ -65,7 +65,7 @@ class MyComboBox(QtGui.QComboBox):
         if flag:
             self.clickable(self).connect(self.onClicked)   
         else:
-            self.removeEventFilter(self.clickable_filter)
+            self.removeEventFilter(self.clickable_filter)   
         
     def mousePressEvent(self,e):
         if self.buttonMode:
@@ -180,6 +180,7 @@ class CheckableTableWidget(QtGui.QWidget):
     def check_texts(self, checked_texts):
         checked_list = []
         self.checked_texts = checked_texts
+        
         for checked_text in checked_texts:
             checked_index = self.index_text(checked_text,self.column_0)
             checked_list.append(checked_index)
@@ -225,7 +226,7 @@ def write_cache(content, project_name):
 
     cur_time = time.strftime('%Y-%m-%d,%H-%M-%S',time.localtime(time.time()))
     file_name = "%s_%s.tmp"%(new_project_name, cur_time)
-    cache_path = temp_dir + "\\" + file_name 
+    cache_path = os.path.join(temp_dir, file_name )
     
     MyPrint("Write Cache to path: %s" %(cache_path))
     
@@ -250,7 +251,7 @@ def read_cache(project_name):
         if project_name in file_name:
             filename_found = file_name
     
-    cache_path = temp_dir + "\\" + filename_found 
+    cache_path = os.path.join(temp_dir, filename_found )
     
     MyPrint("Read Cache from path: %s" %(cache_path))
     
@@ -306,7 +307,7 @@ def clean_cache(project_name):
     else:
         return False
 
-##-------- OLD ------------
+##-------- Garage ------------
 # def read_cache_old(project_name, file_path = None):
 #     if file_path:
 #         temp_dir = file_path
@@ -397,8 +398,10 @@ def write_csv(content_line_lists, file_name, project_name, file_path = None):
         
     cur_time = time.strftime('%Y-%m-%d_%H.%M.%S',time.localtime(time.time()))
     file_name = "%s_%s_%s.csv"%(new_project_name, file_name, cur_time)
-    result_path = result_dir + "\\" + file_name 
+    result_path = os.path.join(result_dir, file_name )
+    
     MyPrint("Write result to path: %s" %(result_path))
+    
     fid = open(result_path, 'w')
     for content_line_list in content_line_lists:
         content_line_str = ','.join(content_line_list)
@@ -430,7 +433,6 @@ def MyPrintf(msg, Verbose, level):
     Verbose[0] is the level of verbocity requested (e.g., Verbose[0]=None means print nothing, =2 means print messages with <= 2 tabs.
     Verbose[1] is the number of tabs in the prefix: the deeper into function calls you are the more tabs there are.
     """
-#     logfile = pathProgram() + '\\Log\\' + 'log.txt'
     logfile = os.path.join(pathProgram(),'Log', 'log.txt')
     
     if not os.path.isfile(logfile):
@@ -451,18 +453,24 @@ def MyPrintf(msg, Verbose, level):
         prefix += '\x20'*8 #Jeff Mod: Change 1 "tab" to 8 "spaces"
     if Verbose[0] != None and Verbose[0] >= Verbose[1]:
         if level == 'NORMAL':
-            prefix_msg =  line_prefix + '[%s][%s]'%(curTime,level) + prefix + msg
-        elif level == 'INFO':
-            prefix_msg =  line_prefix + '[%s][%s]'%(curTime,level) + prefix + msg
+            prefix_msg =  line_prefix + '[%s][INFO_] '%(curTime) + prefix + msg
+        elif level == 'DEBUG':
+            prefix_msg =  line_prefix + '[%s][%s] '%(curTime,level) + prefix + msg
         elif level == 'ERROR':
-            prefix_msg =  line_prefix + '[%s][%s]'%(curTime,level) + prefix + msg
+            prefix_msg =  line_prefix + '[%s][%s] '%(curTime,level) + prefix + msg
         elif level == 'FATAL':
-            prefix_msg =  line_prefix + '[%s][%s]'%(curTime,level) + prefix + msg            
-        elif level == 'NONE':
-            prefix_msg =  line_prefix + '[%s][%s]'%(curTime,level) + prefix + msg                          
+            prefix_msg =  line_prefix + '[%s][%s] '%(curTime,level) + prefix + msg
+#         elif level == 'INFO':
+#             prefix_msg =  line_prefix + '[%s][%s] '%(curTime,level) + prefix + msg
+#         elif level == 'FATAL':
+#             prefix_msg =  line_prefix + '[%s][%s] '%(curTime,level) + prefix + msg            
+#         elif level == 'NONE':
+#             prefix_msg =  line_prefix + '[%s][%s] '%(curTime,level) + prefix + msg                          
         else:
-            prefix_msg =  line_prefix + '[%s][%s]'%(curTime,level) + prefix + msg
-        print prefix_msg    #Show the log message to command window at front end
+            prefix_msg =  line_prefix + '[%s][%s] '%(curTime,level) + prefix + msg
+            
+        print prefix_msg    
+        
         fileHandler.write( prefix_msg + '\n\r' )      #Write the log message to log file at back end
         
     fileHandler.close()   

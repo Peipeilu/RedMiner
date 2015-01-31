@@ -24,12 +24,23 @@ class Create_Issue_Journals(QtCore.QThread):
     send_results = QtCore.pyqtSignal(dict)
     
     def __init__(self, project_id, project_name, personal_key):
+        '''
+        project_id (string)
+        - ID of project
+        
+        project_name (string)
+        - Name of project
+        
+        personal_key (string)
+        - API access key
+        
+        '''
+        
         QtCore.QThread.__init__(self)
         self.personal_key = personal_key
         self.project_id = project_id
         self.project_name = project_name
         self.total_issue_num = None
-#         self.content_lists = []
         
     def run(self):
         self.send_message.emit("Start loading issue journals")
@@ -51,14 +62,13 @@ class Create_Issue_Journals(QtCore.QThread):
         
         issue_journals_dict = {}
         issue_list = request_issue_list_for_project(self.project_id, self.personal_key, total_issue_num)#[-10:]
-        print ">>> issue_list\n", issue_list
+        print "***** issue_list *****\n", issue_list,"\n"
         
         index = 0
         for issue_num in issue_list:
             index = index + 1
             percentage = "{0:.0%}".format(float(index)/total_issue_num)
             
-#             header = "(%s) %d/%d Issue #%d" %(percentage, index, total_issue_num, issue_num)    # old style header
             step_num = 20
             steps_done = int(index*step_num/total_issue_num)
             steps_rest = step_num - steps_done
@@ -95,12 +105,43 @@ class Filter_Issue_Journals(QtCore.QThread):
     send_result_path = QtCore.pyqtSignal(str)
     
     def __init__(self, project_id, project_name, start_date, end_date, step_date , attribute_select , issue_journals_dict, personal_key):
+        '''
+        project_id (string)
+        - ID of project
+        
+        project_name (string)
+        - Name of project
+        
+        start_date (datetime.datetime)
+        - start date of the result
+        
+        end_date (datetime.datetime)
+        - end date of the result
+        
+        step_date (int)
+        - Step interval in days
+        
+        attribute_select (dictionary)
+        - A dictionary which has attribute names as keys and candidate lists as values
+          Example
+          {
+                Status_ID:['Assigned', 'Closed', 'Delivered', 'delivered_dev']
+                Status_Name:['2', '5', '12', '17', '4', '22', '11', '1', '20']
+          }
+        
+        issue_journals_dict (dictionary)
+        - Issue journal detail data
+        
+        personal_key (string)
+        - API access key
+        
+        '''
         QtCore.QThread.__init__(self)
         self.personal_key = personal_key
         self.project_id = project_id
         self.project_name = project_name
-        self.start_date = start_date    # datetime.datetime
-        self.end_date = end_date        # datetime.datetime
+        self.start_date = start_date
+        self.end_date = end_date
         self.step_date = step_date
         self.attribute_select = attribute_select
         self.total_issue_num = None
@@ -111,7 +152,7 @@ class Filter_Issue_Journals(QtCore.QThread):
 # Date filter  
         numdays = (self.end_date - self.start_date).days
         date_list = [self.start_date + timedelta(days = x) for x in range(0, numdays + 1, self.step_date)]
-        print "***** date_list *****\n", date_list
+        print "***** date list *****\n", date_list
         
 # Status filter        
         if 'Status_ID' in self.attribute_select.keys():
@@ -121,7 +162,7 @@ class Filter_Issue_Journals(QtCore.QThread):
             status_id_selection = []
             status_name_selection = []
                  
-        print "***** status name list *****\n", status_id_selection
+        print "***** status name list *****\n", status_id_selection,"\n"
 # Category filter
         
         if 'Category_ID' in self.attribute_select.keys():
@@ -131,7 +172,7 @@ class Filter_Issue_Journals(QtCore.QThread):
             category_id_selection = []
             category_name_selection = []
             
-        print "***** category_list *****\n", category_id_selection
+        print "***** category list *****\n", category_id_selection,"\n"
 
 # Severity filter
         if 'Severity_Name' in self.attribute_select.keys():
@@ -139,7 +180,7 @@ class Filter_Issue_Journals(QtCore.QThread):
         else:
             severity_name_selection = []
             
-        print "***** severity_list *****\n", severity_name_selection
+        print "***** severity list *****\n", severity_name_selection,"\n"
         
 # Generate result
         self.send_message.emit("Start generating severity results")
@@ -155,11 +196,9 @@ class Filter_Issue_Journals(QtCore.QThread):
         
         for select_datetime in date_list:
             counter = [0]*6
-#             sum_counter = 0
             issues_S5 = []
             
             for key,value in self.issue_journals_dict.iteritems():
-#                     print "issue:%d, value:%s" %(key, value)
                 issue = key
                 
                 last_status_id = search_latest_attribute(select_datetime, value['status_changes'])                
@@ -197,7 +236,8 @@ class Filter_Issue_Journals(QtCore.QThread):
                     counter[5] = counter[5] + 1
         
                     issues_S5.append(issue) # For Debugging
-                    
+                
+                # Sum counter
                 counter[0] = counter[0] + 1
                         
             print "[%s] | S1:%d | S2:%d | S3:%d | S4:%d | S5:%d | SUM:%d | issues_S5:%s" %(select_datetime, counter[1], counter[2], counter[3], counter[4], counter[5], counter[0] , issues_S5)
@@ -239,7 +279,6 @@ class Filter_Issue_Journals(QtCore.QThread):
         self.send_result_path.emit(result_path)
         self.send_message.emit("Generate result to path - %s" %(result_path))
         self.send_complete.emit("Complete!\n"+"-"*18)
-#         self.send_message.emit("-"*18)
                 
     def stop(self):
         del self.personal_key
@@ -251,3 +290,4 @@ class Filter_Issue_Journals(QtCore.QThread):
         del self.total_issue_num
         self.send_stop.emit("Stop by User")
         self.terminate()
+        

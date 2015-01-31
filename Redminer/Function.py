@@ -6,6 +6,7 @@ import os
 import urllib
 import xml
 import time
+from Utility import MyPrint
 
 try:
     import xml.etree.cElementTree as ET
@@ -96,11 +97,11 @@ def build_issue_journals_for_project(project_num, personal_key, total_issue_num 
     """
     issue_journals_dict = {}
     issue_list = request_issue_list_for_project(project_num, personal_key, total_issue_num)#[-1:]
-#     print "issue_list",issue_list
+
     i = 0
     for issue_num in issue_list:
         i = i + 1
-        print "(%d/%d) Issue %d" %( i, total_issue_num, issue_num)
+        MyPrint("(%d/%d) Issue %d" %( i, total_issue_num, issue_num), level='DEBUG')
 
         issue_journals_valid = request_issue_journals(issue_num, personal_key)
         if issue_journals_valid:
@@ -163,7 +164,7 @@ def request_issue_list_for_project(project_num, personal_key, total_issue_num):
             
             issue_request_num = issue_request_num + 100
         
-        print "ISSUE NUM:%d" %(len(issue_id_list))
+        MyPrint("ISSUE NUM:%d" %(len(issue_id_list)), level="DEBUG")
         return issue_id_list
         
     except Exception,ex:
@@ -210,10 +211,10 @@ def request_issue_journals(issue_num, personal_key):    #FIXME BELOW
     old_value_priority = ""
     new_value_priority = ""
     
-    first_severity_change = True
-    first_status_change   = True
-    first_priority_change = True
-    first_category_change = True
+    first_severity_change_flag = True
+    first_status_change_flag   = True
+    first_priority_change_flag = True
+    first_category_change_flag = True
     
     first_value_status = ""
     first_value_severity = ""
@@ -234,7 +235,6 @@ def request_issue_journals(issue_num, personal_key):    #FIXME BELOW
     for custom_field in root.getiterator('custom_field'):  
             if custom_field.get('name') == "Seagate Severity" or custom_field.get('id') == "65":
                 severity_current = custom_field.find('value').text
-#                     print "severity_current",severity_current
 
             if custom_field.get('name') == "Seagate Priority" or custom_field.get('id') == "64":
                 priority_current = custom_field.find('value').text
@@ -244,7 +244,6 @@ def request_issue_journals(issue_num, personal_key):    #FIXME BELOW
     
     if root.find('category') != None:
         category_current = root.find('category').get('id')  # Category ID number
-#         print root.find('category').get('id')
     
 # PRESCAN THE HEADER TO IGNORE USELESS WORK - START
     # check if value is "Not Defined" or blank character
@@ -254,13 +253,11 @@ def request_issue_journals(issue_num, personal_key):    #FIXME BELOW
     else:
         first_value_status = status_current
     
-#         print "severity_current",severity_current
     if severity_current is "Not Defined" or not severity_current:  # Skip scanning detail if current value is  "Not Defined" OR ""
         severity_scan = False
         first_value_severity = "Not Defined"
     else:
         first_value_severity = severity_current
-#         print "first_value_severity",first_value_severity
     
     if priority_current is "Not Defined" or not priority_current:  # Skip scanning detail if current value is  "Not Defined" OR ""
         priority_scan = False
@@ -273,11 +270,8 @@ def request_issue_journals(issue_num, personal_key):    #FIXME BELOW
         first_value_category = "Not Defined"
     else:
         first_value_category = category_current
-#         print "first_value_category", first_value_category
-    
-#         print first_value_priority,"<----------------"
-# PRESCAN THE HEADER TO IGNORE USELESS WORK - END
 
+# PRESCAN THE HEADER TO IGNORE USELESS WORK - END
     for journal in root.getiterator('journal'):
         created_on = journal.find('created_on').text
         created_time = datetime.strptime(created_on, '%Y-%m-%dT%H:%M:%SZ') 
@@ -292,11 +286,11 @@ def request_issue_journals(issue_num, personal_key):    #FIXME BELOW
                    
                 status_changes.append([created_time,old_value_status,new_value_status])
 
-                if first_status_change:
-                    first_status_change = False
+                if first_status_change_flag:
                     first_value_status = old_value_status
+                    first_status_change_flag = False
                 
-                print "[%s] Status | old -> new : %s -> %s" %(created_time, old_value_status, new_value_status)
+                MyPrint( "(%s) Status | old -> new : %s -> %s" %(created_time, old_value_status, new_value_status),level='DEBUG')
             
             elif severity_scan and detail.get('name') == "65":    # severity change   
                 old_value_severity = detail.find('old_value').text if detail.find('old_value').text else "Not Defined"
@@ -304,11 +298,11 @@ def request_issue_journals(issue_num, personal_key):    #FIXME BELOW
                 
                 severity_changes.append([created_time,old_value_severity,new_value_severity])     
                 
-                if first_severity_change:
-                    first_severity_change = False
+                if first_severity_change_flag:
                     first_value_severity = old_value_severity
+                    first_severity_change_flag = False
                 
-                print "[%s] Severity | old -> new : %s -> %s" %(created_time, old_value_severity, new_value_severity)
+                MyPrint( "(%s) Severity | old -> new : %s -> %s" %(created_time, old_value_severity, new_value_severity),level='DEBUG')
             
             elif priority_scan and detail.get('name') == "64":    # priority change
 
@@ -317,11 +311,11 @@ def request_issue_journals(issue_num, personal_key):    #FIXME BELOW
                 
                 priority_changes.append([created_time,old_value_priority,new_value_priority])                 
                 
-                if first_priority_change:
-                    first_priority_change = False
+                if first_priority_change_flag:
                     first_value_priority = old_value_priority
+                    first_priority_change_flag = False
                     
-                print "[%s] Priority | old -> new : %s -> %s" %(created_time, old_value_priority, new_value_priority)
+                MyPrint( "(%s) Priority | old -> new : %s -> %s" %(created_time, old_value_priority, new_value_priority), level='DEBUG')
             
             elif category_scan and detail.get('name') == "category_id":
                 
@@ -330,13 +324,13 @@ def request_issue_journals(issue_num, personal_key):    #FIXME BELOW
 
                 category_changes.append([created_time,old_value_category,new_value_category])      
                 
-                if first_category_change:
-                    first_category_change = False
+                if first_category_change_flag:
+                    first_category_change_flag = False
                     first_value_category = old_value_category
                     
-                print "[%s] Category | old -> new : %s -> %s" %(created_time, old_value_category, new_value_category)
+                MyPrint( "(%s) Category | old -> new : %s -> %s" %(created_time, old_value_category, new_value_category), level='DEBUG')
                    
-# MAKE UP INITIAL ISSUE ATTRIBUTES - START
+# ADD IN INITIAL ISSUE ATTRIBUTES - START
     created_on = root.find('created_on').text
     created_time = datetime.strptime(created_on, '%Y-%m-%dT%H:%M:%SZ') 
     
@@ -345,32 +339,31 @@ def request_issue_journals(issue_num, personal_key):    #FIXME BELOW
     
     status_changes.insert(0, [created_time,old_value_status,new_value_status])
     
-    print "[%s] Status | old -> new : %s -> %s" %(created_time, old_value_status, new_value_status)
+    MyPrint( "(%s) Status | old -> new : %s -> %s" %(created_time, old_value_status, new_value_status), level='DEBUG')
     
     old_value_severity = "Not Defined"
     new_value_severity = first_value_severity
     
     severity_changes.insert(0, [created_time,old_value_severity,new_value_severity])     
     
-    print "[%s] Severity | old -> new : %s -> %s" %(created_time, old_value_severity, new_value_severity)
+    MyPrint( "(%s) Severity | old -> new : %s -> %s" %(created_time, old_value_severity, new_value_severity), level='DEBUG')
     
     old_value_priority = "Not Defined"
     new_value_priority = first_value_priority
     
     priority_changes.insert(0, [created_time,old_value_priority,new_value_priority]) 
     
-    print "[%s] Priority | old -> new : %s -> %s" %(created_time, old_value_priority, new_value_priority)
+    MyPrint( "(%s) Priority | old -> new : %s -> %s" %(created_time, old_value_priority, new_value_priority), level='DEBUG')
     
     old_value_category = "Not Defined"
     new_value_category = first_value_category
     
     category_changes.insert(0, [created_time,old_value_category,new_value_category])
     
-    print "[%s] Category | old -> new : %s -> %s" %(created_time, old_value_category, new_value_category)
-    
-    
-# MAKE UP MAKEUP INITIAL ISSUE ATTRIBUTES - END
-    
+    MyPrint( "(%s) Category | old -> new : %s -> %s" %(created_time, old_value_category, new_value_category), level='DEBUG')
+      
+# ADD IN INITIAL ISSUE ATTRIBUTES - END
+
     journal_change = {"status_changes":status_changes, "severity_changes": severity_changes, 
                       "priority_changes":priority_changes, "category_changes": category_changes }
     
@@ -460,6 +453,7 @@ def generate_url(request, personal_key):
         request_url = 'http://redminesbs.plan.io' + request + '?key=' + personal_key
     
     print request_url
+    
     return request_url
     
 def request_project_list(personal_key = None):
@@ -537,7 +531,6 @@ def request_category_dict(project_id, personal_key):
     """
     
     request = '/projects/%s/issue_categories.xml' %(project_id)
-    print request
     request_url = generate_url(request, personal_key)
     category_id_dict = {}
     
@@ -567,7 +560,7 @@ def __old_request_issue_journals(issue_num, personal_key):  # minidom implementa
     
     try:
         xml = urllib.urlopen(request_url)
-        print "Done"
+
         tree= ET.parse(xml) 
         root = tree.getroot()
         

@@ -38,7 +38,8 @@ class CredentialWindow(QDialog, Ui_Dialog):
         
         if len(credential_str) != 40:
             self.__show_warning_message("Credential key length is not correct! Please re-enter a valid key.")
-#         elif not check_credential_complete(credential_str):  # check_credential_sim - check length of key # check_credential_complete - send a real request to check (slow)
+#         # check_credential_sim - check length of key # check_credential_complete - send a real request to check (slow)
+#         elif not check_credential_complete(credential_str):  
 #             self.__show_warning_message("Checking Credential key fails.Please re-enter a valid key.")
         else:
             self.credential = credential_str

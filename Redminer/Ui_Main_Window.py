@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'C:\WorkSpace\Redmine_Issue_Tracker\Redminer\Main_Window.ui'
 #
-# Created: Wed Jan 28 17:17:32 2015
+# Created: Fri Jan 30 13:22:08 2015
 #      by: PyQt4 UI code generator 4.10.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -344,7 +344,7 @@ class Ui_Redminer(object):
         self.horizontalGroupBox.setFont(font)
         self.horizontalGroupBox.setObjectName(_fromUtf8("horizontalGroupBox"))
         self.gridLayout_3 = QtGui.QGridLayout(self.horizontalGroupBox)
-        self.gridLayout_3.setMargin(10)
+        self.gridLayout_3.setContentsMargins(10, 10, 10, 16)
         self.gridLayout_3.setHorizontalSpacing(10)
         self.gridLayout_3.setVerticalSpacing(8)
         self.gridLayout_3.setObjectName(_fromUtf8("gridLayout_3"))
@@ -442,6 +442,11 @@ class Ui_Redminer(object):
         self.label_8.setText(_translate("Redminer", "Data Source     ", None))
         self.pushButton_project_load.setText(_translate("Redminer", "Load", None))
         self.label_9.setText(_translate("Redminer", "Last Copy Time", None))
+        self.textEdit_lastCopyTime.setHtml(_translate("Redminer", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+"p, li { white-space: pre-wrap; }\n"
+"</style></head><body style=\" font-family:\'Tahoma\'; font-size:8.25pt; font-weight:400; font-style:normal;\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt;\">N/A</span></p></body></html>", None))
         self.gridGroupBox.setTitle(_translate("Redminer", "Time Panel", None))
         self.label_2.setText(_translate("Redminer", "  End Date", None))
         self.label_3.setText(_translate("Redminer", "  Start Date", None))

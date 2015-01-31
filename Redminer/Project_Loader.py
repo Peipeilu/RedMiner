@@ -18,7 +18,6 @@ class Project_Loader(QtCore.QThread):
         self.personal_key = personal_key
     
     def run(self):
-        print "Project_Loader runs"
         try:    
             self.project_dict = request_project_list(self.personal_key)
             
