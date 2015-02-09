@@ -4,7 +4,7 @@ import os
 import time
 import subprocess
 
-from datetime import timedelta
+from datetime import timedelta,datetime
 from collections import OrderedDict
 
 from PyQt4.QtGui import *
@@ -23,15 +23,12 @@ import Project_Loader
 import Issue_Journals_Handler
 
 __ver__ = readVersion()
-
-__copyright__ = "Seagate Confidential, Internal Use Only "
-__date__ = time.strftime("%m/%d/%Y")
-
 if __ver__:
     __version__ = "V"+__ver__
 else:
     __version__ = ""
-    
+
+__copyright__ = "Seagate Confidential, Internal Use Only "
 __developer__ = "Jeffrey C. Ye"
 __producer__ = "Cupertino Branded Software Team"
 __email__ = "cong.ye@seagate.com"
@@ -40,7 +37,6 @@ print ""
 print ">>>>>>>>>>>>>>>>   Redminer   <<<<<<<<<<<<<<<<<<<"
 print ">>>"
 print ">>>   IDHT Version: %s" %(__version__)
-print ">>>   Release Date: %s" %(__date__)
 print ">>>   Author: %s " %(__developer__)
 print ">>>   Producer: %s" %(__producer__)
 print ">>>   Email: %s" %(__email__)
@@ -77,14 +73,14 @@ class MainWindow(QMainWindow, Ui_Redminer):
         self.issue_journals_inst = None
         self.slider_value = 1
         self.cache_source = False
-        self.setting_loaded = True
+        self.setting_loaded = False
         self.last_result_path = None
         self.enable_menu = False
-#         self.severity_dict = None
         self.category_dict = None
         self.status_dict = None
         self.project_journal_loading = False
         self.severity_list = None
+        self.issue_journals_dict = None
         
     def initilze(self):
         '''
@@ -121,8 +117,6 @@ class MainWindow(QMainWindow, Ui_Redminer):
         today = time.strftime('%Y-%m-%d',time.localtime(time.time()))
         min_day = "2013-01-01"
         
-#         self.ui.pushButton_project_load.setEnabled(False)
-        
         self.__disable_preference_panel()
         self.__disable_loading_panel()
         self.__disable_control_panel()
@@ -147,11 +141,6 @@ class MainWindow(QMainWindow, Ui_Redminer):
                     self.setting_loaded = True
                     self.__load_settings()
                     self.print_to_console("Load saved settings successfully")
-
-#                     self.__disable_preference_panel()
-#                     self.__disable_loading_panel()
-#                     self.__disable_control_panel()
-#                     self.__disable_filter_panel()
                     
                 else:
                     self.print_to_console("User choose to ignore loading saved settings")
@@ -161,8 +150,6 @@ class MainWindow(QMainWindow, Ui_Redminer):
                     
         self.ui.dateEdit_end.setMaximumDate(QtCore.QDate.fromString(today,"yyyy-MM-dd"))
         self.ui.dateEdit_end.setMinimumDate(QtCore.QDate.fromString(min_day,"yyyy-MM-dd"))
-        
-        
         
     def bindSignals(self):
         self.ui.comboBox_project.activated['QString'].connect(self.on_select_project)
@@ -217,7 +204,7 @@ class MainWindow(QMainWindow, Ui_Redminer):
     def __enable_control_panel(self):
         self.ui.pushButton_run.setEnabled(True)
         self.ui.pushButton_stop.setEnabled(False)
-        self.ui.pushButton_result.setEnabled(True)  
+        self.ui.pushButton_result.setEnabled(False)  
     
     def __enable_menu(self):
         self.enable_menu = True
@@ -312,7 +299,6 @@ class MainWindow(QMainWindow, Ui_Redminer):
             # Status
             status_dict_random = request_status_dict(self.personal_key)
             self.status_dict = OrderedDict(sorted(status_dict_random.items(), key=lambda t: t[1].upper()))
-#             print "status_dict",type(self.status_dict), self.status_dict
             
             # Severity
             self.severity_list = ["S1","S2","S3","S4","S5"]
@@ -321,7 +307,6 @@ class MainWindow(QMainWindow, Ui_Redminer):
             category_dict_random = request_category_dict(self.current_project_id ,self.personal_key)
             if category_dict_random:
                 self.category_dict = OrderedDict(sorted(category_dict_random.items(), key=lambda t: t[1].upper()))
-#                 print "category_dict",type(self.category_dict), self.category_dict
             else:
                 self.category_dict = None
             
@@ -342,9 +327,7 @@ class MainWindow(QMainWindow, Ui_Redminer):
                 self.attribute_select_dict.pop("Category_Name", None)
             
 #             self.setting_loaded = False
-                
-#             self.check_all_filter_set()
-#             self.check_all_filter_enable()
+
         else:
             self.print_to_console("Set Project [%s] ID [%s]" %(self.current_project_name,self.current_project_id))
         
@@ -362,7 +345,7 @@ class MainWindow(QMainWindow, Ui_Redminer):
             self.project_loader_inst.start()
                 
             self.project_loader_inst.load_complete.connect(self.on_load_project_complete)
-            self.project_loader_inst.load_fail.connect(self.on_load_fail)
+            self.project_loader_inst.load_fail.connect(self.on_load_project_fail)
             
     
     @QtCore.pyqtSlot(dict)
@@ -374,19 +357,14 @@ class MainWindow(QMainWindow, Ui_Redminer):
         
         self.print_to_console("Project list loading complete")
 
-#         self.ui.pushButton_project_load.setText("> OK")
         self.ui.comboBox_project.setButtonMode(False)
         self.ui.comboBox_project.setEnabled(True)
         self.loaded = True
         
-#         self.check_all_filter_set()
-        
         self.mutex.unlock() # release the mutex lock
     
     @QtCore.pyqtSlot()
-    def on_load_fail(self): 
-        print ">>> on_load_fail"
-        
+    def on_load_project_fail(self):         
         self.print_to_console("Loading project list from Redmine fails, please try again.")
         self.project_loader_inst.stop()
         self.loaded = False
@@ -420,27 +398,38 @@ class MainWindow(QMainWindow, Ui_Redminer):
     
     @pyqtSignature("")
     def on_pushButton_project_load_clicked(self):   
-        if not self.project_journal_loading:  # For load button
-#             self.on_select_project()
+        
+        # For load button
+        if not self.project_journal_loading:  
             self.__switch_pushButton_project_load()
             self.__disable_loading_panel()
             self.ui.pushButton_project_load.setEnabled(True)
             
             self.start_load_issue_journal()
             
-            if not self.setting_loaded:  # Check if it's initial state
+            # Check setting file is loaded
+            if not self.setting_loaded:  
                 # If switch between different projects.
                 self.attribute_select_dict.pop("Category_Name", None)
                 
             self.setting_loaded = False
-#             self.check_all_filter_set()
-            
-        else:   # For stop button
+
+        # For load button
+        else:   
             if self.issue_journals_inst:
                 if self.__show_question_message("Are you sure you want to terminate the task?"):
                     self.issue_journals_inst.stop() 
     
     def start_load_issue_journal(self):
+        def load_local_copy():
+            self.print_to_console("Local copy created at %s is found, avoid downloading data and load it."%(last_cache_time))
+            cache_obj = read_cache(self.current_project_name)
+            self.__on_processing_results(cache_obj) 
+                  
+        def download_server_data():
+            self.print_to_console("Local copy created at %s is found, user choose to download newest data."%(last_cache_time))
+            self.start_creating_issue_journal()
+        
         self.__disable_preference_panel()
         self.__disable_filter_panel()
         self.__disable_control_panel()
@@ -449,33 +438,38 @@ class MainWindow(QMainWindow, Ui_Redminer):
         MyPrint( self.current_project_name, level='NORMAL')
         
         last_cache_time = check_cache(self.current_project_name)
-        
-        if last_cache_time:   # check if cache exists for certain project and date
-            self.ui.textEdit_lastCopyTime.setText(str(last_cache_time))
-            if self.ui.checkBox_source.isChecked(): # if checkbox is checked
-                self.print_to_console("Cache created at %s is found, avoid downloading data and load it"%(last_cache_time))
-                cache_obj = read_cache(self.current_project_name)
-#                 self.ui.checkBox_source.setCheckState(Qt.Checked)
-                self.on_send_results(cache_obj)  
-                              
-            else:   # if checkbox is not checked
-                message = "Cache created at %s is found.\nDo you want to load it and skip downloading data from server?"%(last_cache_time)
-                
-                if self.__show_question_message(message):   # if user select "Yes"
-                    self.print_to_console("Cache created at %s is found, avoid downloading data and load it."%(last_cache_time))
-                    cache_obj = read_cache(self.current_project_name)
+               
+        # check if cache exists for certain project and date
+        if last_cache_time:   
+            current_time = datetime.now()
+            delta_time = current_time - last_cache_time
+            
+            if delta_time.days < 7:
+                self.ui.textEdit_lastCopyTime.setText(str(last_cache_time))
+                if self.ui.checkBox_source.isChecked(): # if checkbox is checked
+                    load_local_copy()
+                               
+                else:   # if checkbox is not checked
+                    message = "Local copy created at %s is found.\nDo you want to load it and skip downloading data from server?"%(last_cache_time)
+                    if self.__show_question_message(message):   # if user select "Yes"
+                        load_local_copy()
+                        self.ui.checkBox_source.setCheckState(Qt.Checked)
+                        
+                    else:   # if user select "NO"
+                        download_server_data()
+                        self.ui.checkBox_source.setCheckState(Qt.Unchecked)
+                        self.__disable_loading_panel()
+                        self.ui.pushButton_project_load.setEnabled(True)
+            else:
+                message = "The local data copy was generated at least one week before.\nDo you want to download newest data from server again?"
+                if self.__show_question_message(message):   # if user select "Yes"                
+                    download_server_data()
+                else:
+                    load_local_copy()
                     self.ui.checkBox_source.setCheckState(Qt.Checked)
-                    self.__on_processing_results(cache_obj)
-                    
-                else:   # if user select "NO"
-                    self.print_to_console("Cache created at %s is found, user choose to download newest data."%(last_cache_time))
-                    self.ui.checkBox_source.setCheckState(Qt.Unchecked)
-                    self.__disable_loading_panel()
-                    self.ui.pushButton_project_load.setEnabled(True)
-                    self.start_creating_issue_journal()
-                    
+                
         else:   # If Cache not found
-            self.print_to_console("Cache not found, start loading data.")
+            self.print_to_console("Local copy not found, start loading data.")
             self.ui.textEdit_lastCopyTime.setText("N/A")
             
             if not check_connectivity("http://www.google.com"):
@@ -495,8 +489,6 @@ class MainWindow(QMainWindow, Ui_Redminer):
     
     @pyqtSignature("")
     def on_pushButton_stop_clicked(self):
-        print ">>> on_pushButton_stop_clicked"
-        
         if self.issue_journals_inst:
             if self.__show_question_message("Are you sure you want to terminate the task?"):
                 self.issue_journals_inst.stop()
@@ -526,6 +518,8 @@ class MainWindow(QMainWindow, Ui_Redminer):
         self.__enable_loading_panel()
         self.__enable_menu()
         
+        self.check_all_filter_set()
+        
         self.mutex.unlock()
 
     @QtCore.pyqtSlot(str)
@@ -548,6 +542,7 @@ class MainWindow(QMainWindow, Ui_Redminer):
         self.__disable_filter_panel()
         self.__disable_control_panel()
         self.__disable_loading_panel()
+        
         self.start_creating_result_date()
         
     def start_creating_result_date(self):
@@ -574,7 +569,6 @@ class MainWindow(QMainWindow, Ui_Redminer):
     @QtCore.pyqtSlot(str)
     def on_result_path(self, message):
         MyPrint(message, level = "NORMAL")
-#         self.print_to_console(message)
         self.last_result_path = message
     
     @QtCore.pyqtSlot(str)
@@ -602,6 +596,8 @@ class MainWindow(QMainWindow, Ui_Redminer):
             self.ui.textEdit_lastCopyTime.setText("N/A")
             self.ui.checkBox_source.setCheckState(Qt.Unchecked)
             self.ui.checkBox_source.setEnabled(False)
+        
+        self.ui.pushButton_result.setEnabled(True)
         
         self.mutex.unlock()
         
@@ -640,10 +636,10 @@ class MainWindow(QMainWindow, Ui_Redminer):
         
         self.status_name_list = self.status_dict.values()
         self.status_id_list = self.status_dict.keys()
-#         self.attribute_select_dict.update({"Status_Mapping": self.status_dict})
+
         attribute_title = "Status"
         attribute_name = "%s_Name" %(attribute_title)
-#         print self.attribute_select_dict.keys()
+
         if attribute_name in self.attribute_select_dict.keys():
             selection_names = self.attribute_select_dict[attribute_name]
         else:
@@ -652,7 +648,7 @@ class MainWindow(QMainWindow, Ui_Redminer):
         self.show_selection_dialog(attribute_title, 
                                    len(self.status_dict), 
                                    2, 
-                                   [self.status_name_list,self.status_id_list], 
+                                   [self.status_name_list, self.status_id_list], 
                                    selection_names
                                    )
         
@@ -662,6 +658,7 @@ class MainWindow(QMainWindow, Ui_Redminer):
         
         self.category_name_list = self.category_dict.values()
         self.category_id_list = self.category_dict.keys()
+        
         attribute_title = "Category"
         attribute_name = "%s_Name" %(attribute_title)
 
@@ -673,7 +670,7 @@ class MainWindow(QMainWindow, Ui_Redminer):
         self.show_selection_dialog(attribute_title, 
                                    len(self.category_dict), 
                                    2, 
-                                   [self.category_name_list,self.category_id_list], 
+                                   [self.category_name_list, self.category_id_list], 
                                    selection_names
                                    )
  
@@ -692,7 +689,12 @@ class MainWindow(QMainWindow, Ui_Redminer):
         else:
             selection_names = []
             
-        self.show_selection_dialog(attribute_title, len(self.severity_list), 1, [self.severity_list], selection_names)
+        self.show_selection_dialog(
+                                   attribute_title, 
+                                   len(self.severity_list), 
+                                   1, 
+                                   [self.severity_list], 
+                                   selection_names)
         
 
     def show_selection_dialog(self, attribute_title, rows, columns, content_matrix, check_text_list):
@@ -719,12 +721,10 @@ class MainWindow(QMainWindow, Ui_Redminer):
         
         self.print_to_console("%s:%s" %(self.attribute_title, selection_names))
         self.check_all_filter_set()
-#         self.selection_window.clear_wideget()
     
     def on_slider_moved(self):
         self.slider_value = str(self.ui.horizontalSlider_accuracy.value())
         self.ui.label_accuracy.setText(self.slider_value)
-        print ">>> Slider Value - ",self.slider_value
 
     def on_state_changed(self):
         if self.ui.checkBox_source.isChecked():
@@ -732,14 +732,15 @@ class MainWindow(QMainWindow, Ui_Redminer):
         else:
             self.cache_source = False
             
-        print ">>> Checkbox Cache Only Value - %s" %(self.cache_source)
+        MyPrint( ">>> Checkbox Cache Only Value - %s" %(self.cache_source), level='DEBUG')
 
     def on_dialog_reset(self):
-#         self.selection_names = []
-#         self.selection_ids = []
         pass
     
     def check_all_filter_set(self):
+        if not self.issue_journals_dict:
+            return
+        
         attribute_ready_counter = 0
         
         if self.status_dict:
@@ -748,7 +749,7 @@ class MainWindow(QMainWindow, Ui_Redminer):
                 self.ui.pushButton_status_switch.setIcon(QtGui.QIcon(self.icon_check))
             else:
                 self.ui.pushButton_status_switch.setIcon(QtGui.QIcon(self.icon_pending))
-#             self.ui.pushButton_status_select.setEnabled(True)
+
         else:
             attribute_ready_counter = attribute_ready_counter + 1
             self.ui.pushButton_status_switch.setIcon(QtGui.QIcon(self.icon_ban))
@@ -760,7 +761,7 @@ class MainWindow(QMainWindow, Ui_Redminer):
                 self.ui.pushButton_category_switch.setIcon(QtGui.QIcon(self.icon_check))
             else:
                 self.ui.pushButton_category_switch.setIcon(QtGui.QIcon(self.icon_pending))
-#             self.ui.pushButton_category_select.setEnabled(True)
+
         else:
             attribute_ready_counter = attribute_ready_counter + 1
             self.ui.pushButton_category_switch.setIcon(QtGui.QIcon(self.icon_ban))
@@ -772,7 +773,7 @@ class MainWindow(QMainWindow, Ui_Redminer):
                 self.ui.pushButton_severity_switch.setIcon(QtGui.QIcon(self.icon_check))
             else:
                 self.ui.pushButton_severity_switch.setIcon(QtGui.QIcon(self.icon_pending))
-#             self.ui.pushButton_severity_select.setEnabled(True)
+
         else:
             attribute_ready_counter = attribute_ready_counter + 1
             self.ui.pushButton_severity_switch.setIcon(QtGui.QIcon(self.icon_ban))
@@ -784,22 +785,32 @@ class MainWindow(QMainWindow, Ui_Redminer):
     @pyqtSignature("")
     def on_pushButton_result_clicked(self):
         print "on_pushButton_result_clicked"
-#         result_dir = os.path.join(pathProgram(),'Result')
+
         if self.last_result_path:
             self.print_to_console("Open last result file - %s"%(self.last_result_path))
             
-            if os.name == 'nt': # If OS is Windows
-                subprocess.Popen('explorer %s' %(self.last_result_path))
-            else:   #If OS is other than Windows, linux most likely - posix
-                os.system('xdg-open "%s"' %self.last_result_path)
+            if os.name == 'nt': # If OS is Windows - nt
+                try:
+                    subprocess.Popen('explorer %s' %(self.last_result_path))   
+                except:
+                    self.__show_warning_message("Fail to use default application to open the result file.\n Please install a software that can open csv file")      
+                else:
+                    self.print_to_console("Open last result file successfully")
+                    
+            else:   #If it is other than Windows, linux most likely - posix
+                try:
+                    os.system('xdg-open "%s"' %self.last_result_path)
+                except:
+                    self.__show_warning_message("Fail to use default application to open the result file.\n \
+                                                Please install a software that can open csv file")
+                else:
+                    self.print_to_console("Open last result file successfully")
+                    
         else:
             self.print_to_console("No record found during the program running.")
         
     @pyqtSignature("")
     def on_actionSave_triggered(self):
-#     def on_pushButton_save_clicked(self):
-        print "on_pushButton_save_clicked"
-        
         if not self.enable_menu:
             self.__show_warning_message("Please manipulate menus when program stops processing data.")
             return 
@@ -831,10 +842,7 @@ class MainWindow(QMainWindow, Ui_Redminer):
             self.__show_warning_message(msg)
 
     @pyqtSignature("")
-    def on_actionClear_triggered(self):
-#     def on_pushButton_clear_clicked(self):
-        print "on_pushButton_clear_clicked"
-        
+    def on_actionClear_triggered(self): 
         if not self.enable_menu:
             self.__show_warning_message("Please manipulate menus when program stops processing data.")
             return 
@@ -843,12 +851,10 @@ class MainWindow(QMainWindow, Ui_Redminer):
         if self.__show_question_message(message):   # if user select "Yes"
             self.print_to_console("Saved settings have been cleared.")
             cleanEnvironment()
-            self.__restart_app()
-#             self.ui.pushButton_clear.setEnabled(False)     
+            self.__restart_app()   
 
     @pyqtSignature("")
     def on_actionRestart_triggered(self):
-#     def on_pushButton_restart_clicked(self): 
         if not self.enable_menu:
             self.__show_warning_message("Please manipulate menus when program stops processing data.")
             return 
@@ -890,17 +896,6 @@ class MainWindow(QMainWindow, Ui_Redminer):
         if self.__show_question_message("Resetting the credential key will cause the application to restart at meantime. Are you sure?"):
             cleanCredential()
             self.__restart_app()
-            
-#     def show_credential_dialog(self):
-#         if loadCredential():
-#             self.credential_key = loadCredential()
-#         else:
-#             self.credential_key = ""
-#             
-#         self.credential_window = CredentialWindow(credential = self.credential_key)
-#         self.credential_window.show()    
-#         
-#         self.credential_window.credential_accpeted.connect(self.on_credential_accpeted)
         
     @QtCore.pyqtSlot(str)
     def on_credential_accpeted(self, message): 
@@ -929,7 +924,6 @@ class MainWindow(QMainWindow, Ui_Redminer):
             end_date = param_list[3][1]
             accuracy = param_list[4][1]
             
-
             if project_name != 'None':
                 project_dict = request_project_list(self.personal_key)
                 self.ordered_project_dict = OrderedDict(sorted(project_dict.items(), key=lambda t: t[0].upper()))
@@ -966,8 +960,7 @@ class MainWindow(QMainWindow, Ui_Redminer):
                 
                 self.loaded = True
                 self.check_all_filter_set()
-#                 self.__enable_filter_panel()
-#                 self.__enable_preference_panel()
+
                 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)

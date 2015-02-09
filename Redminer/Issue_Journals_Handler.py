@@ -162,7 +162,7 @@ class Filter_Issue_Journals(QtCore.QThread):
             status_id_selection = []
             status_name_selection = []
                  
-        print "***** status name list *****\n", status_id_selection,"\n"
+        print "***** status ID selection list *****\n", status_id_selection,"\n"
 # Category filter
         
         if 'Category_ID' in self.attribute_select.keys():
@@ -172,7 +172,7 @@ class Filter_Issue_Journals(QtCore.QThread):
             category_id_selection = []
             category_name_selection = []
             
-        print "***** category list *****\n", category_id_selection,"\n"
+        print "***** category selection list *****\n", category_id_selection,"\n"
 
 # Severity filter
         if 'Severity_Name' in self.attribute_select.keys():
@@ -180,7 +180,7 @@ class Filter_Issue_Journals(QtCore.QThread):
         else:
             severity_name_selection = []
             
-        print "***** severity list *****\n", severity_name_selection,"\n"
+        print "***** severity selection list *****\n", severity_name_selection,"\n"
         
 # Generate result
         self.send_message.emit("Start generating severity results")
@@ -205,21 +205,18 @@ class Filter_Issue_Journals(QtCore.QThread):
                 last_category_id = search_latest_attribute(select_datetime, value['category_changes'])
                 last_severity_name = search_latest_attribute(select_datetime, value['severity_changes'])
                 
-#                 if issue == 21717:
-#                     print 'Issue number ->', issue
-#                     print 'last_status_id ->', last_status_id
-#                     print 'last_category_id ->', last_category_id
-#                     print 'last_severity_name ->', last_severity_name
-                
                 if category_id_selection and (last_category_id not in category_id_selection):
                     continue
                     
                 if status_id_selection and (last_status_id not in status_id_selection):
                     continue
                 
-                if last_severity_name and (last_severity_name not in severity_name_selection):
+                if severity_name_selection and (last_severity_name not in severity_name_selection):
                     continue
                 
+                # Sum Counter
+                counter[0] = counter[0] + 1
+    
                 if   last_severity_name == "S1":
                     counter[1] = counter[1] + 1
                     
@@ -236,12 +233,14 @@ class Filter_Issue_Journals(QtCore.QThread):
                     counter[5] = counter[5] + 1
         
                     issues_S5.append(issue) # For Debugging
-                
-                # Sum counter
-                counter[0] = counter[0] + 1
+                else:
+                    print "last_severity_name-->",last_severity_name, type(last_severity_name)
                         
-            print "[%s] | S1:%d | S2:%d | S3:%d | S4:%d | S5:%d | SUM:%d | issues_S5:%s" %(select_datetime, counter[1], counter[2], counter[3], counter[4], counter[5], counter[0] , issues_S5)
-            
+#             print "[%s] | S1:%d | S2:%d | S3:%d | S4:%d | S5:%d | SUM:%d | issues_S5:%s" %(select_datetime, counter[1], counter[2], counter[3], counter[4], counter[5], counter[0] , issues_S5)
+#             print "[%s] | S1:%d | S2:%d | S3:%d | S4:%d | S5:%d | SUM:%d | issue_closed:%s" %(select_datetime, counter[1], counter[2], counter[3], counter[4], counter[5], counter[0] , issue_closed)
+            print "[%s] | S1:%d | S2:%d | S3:%d | S4:%d | S5:%d | SUM:%d |" %(
+                  select_datetime, counter[1], counter[2], counter[3], counter[4], counter[5], counter[0])
+             
             content_list = [str(counter[index]) for index in range(len(severity_name_selection) + 1)]
             content_list.insert(0, str(select_datetime))
             

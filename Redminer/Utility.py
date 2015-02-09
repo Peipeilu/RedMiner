@@ -69,7 +69,7 @@ class MyComboBox(QtGui.QComboBox):
         
     def mousePressEvent(self,e):
         if self.buttonMode:
-            print "Do nothing"    # Do nothing
+            pass    # Do nothing
         else:
             super(MyComboBox, self).mousePressEvent(e)
     
@@ -140,7 +140,7 @@ class CheckableTableWidget(QtGui.QWidget):
         for column in range(len(width_list)):
             self.table.setColumnWidth(column, width_list[column])
     
-    def checkItemNameClicked(self):
+    def itemNameClicked(self):
         for item in self.column_0:
             if item.checkState() == QtCore.Qt.Checked:
 #                 print('%s Checked' % item.text()) 
@@ -148,13 +148,20 @@ class CheckableTableWidget(QtGui.QWidget):
                 self.checked_item_name_list.append(str(item.text()))
         return self.checked_item_name_list
 
-    def checkItemIdClicked(self):
+    def itemIdClicked(self):
         for i in range(len(self.column_1)):
             item = self.column_0[i]
             if item.checkState() == QtCore.Qt.Checked:
                 self.checked_item_id_list.append(str(self.column_1[i].text()))
         return self.checked_item_id_list        
-
+    
+    def itemIndexChecked(self):
+        for index in range(len(self.column_1)):
+            item = self.column_0[index]
+            if item.checkState() == QtCore.Qt.Checked:
+                self.checked_item_index_list.append(index)
+        return self.checked_item_index_list          
+    
     def clear(self):
         self.checked_item_name_list = []
         self.checked_item_id_list = []
@@ -175,7 +182,9 @@ class CheckableTableWidget(QtGui.QWidget):
 
         for unchecked_index in unchecked_set:
             self.column_0[unchecked_index].setCheckState(QtCore.Qt.Unchecked)
-            
+    
+    def hide_column(self, column_index):
+        self.table.hideColumn(column_index)
     
     def check_texts(self, checked_texts):
         checked_list = []
@@ -459,13 +468,7 @@ def MyPrintf(msg, Verbose, level):
         elif level == 'ERROR':
             prefix_msg =  line_prefix + '[%s][%s] '%(curTime,level) + prefix + msg
         elif level == 'FATAL':
-            prefix_msg =  line_prefix + '[%s][%s] '%(curTime,level) + prefix + msg
-#         elif level == 'INFO':
-#             prefix_msg =  line_prefix + '[%s][%s] '%(curTime,level) + prefix + msg
-#         elif level == 'FATAL':
-#             prefix_msg =  line_prefix + '[%s][%s] '%(curTime,level) + prefix + msg            
-#         elif level == 'NONE':
-#             prefix_msg =  line_prefix + '[%s][%s] '%(curTime,level) + prefix + msg                          
+            prefix_msg =  line_prefix + '[%s][%s] '%(curTime,level) + prefix + msg                      
         else:
             prefix_msg =  line_prefix + '[%s][%s] '%(curTime,level) + prefix + msg
             
@@ -544,7 +547,7 @@ def loadEnvironment(file_path = None):
             param_list.append(param_element_list_no_index)
             
     fileHandle.close()
-    print param_list
+
     return param_list
 
 def readVersion(file_path = None):
