@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'C:\WorkSpace\Redmine_Issue_Tracker\Redminer\Main_Window.ui'
 #
-# Created: Thu Feb 05 15:32:41 2015
+# Created: Mon Feb 09 14:25:28 2015
 #      by: PyQt4 UI code generator 4.10.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_Redminer(object):
     def setupUi(self, Redminer):
         Redminer.setObjectName(_fromUtf8("Redminer"))
-        Redminer.resize(915, 538)
+        Redminer.resize(915, 540)
         self.centralWidget = QtGui.QWidget(Redminer)
         self.centralWidget.setObjectName(_fromUtf8("centralWidget"))
         self.horizontalLayout = QtGui.QHBoxLayout(self.centralWidget)
@@ -45,7 +45,7 @@ class Ui_Redminer(object):
         self.checkBox_source.setSizeIncrement(QtCore.QSize(0, 25))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Tahoma"))
-        font.setPointSize(8)
+        font.setPointSize(9)
         font.setBold(False)
         font.setItalic(False)
         font.setUnderline(False)
@@ -109,7 +109,7 @@ class Ui_Redminer(object):
         spacerItem = QtGui.QSpacerItem(48, 20, QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Minimum)
         self.gridLayout_5.addItem(spacerItem, 2, 2, 1, 1)
         self.label_9 = QtGui.QLabel(self.centralWidget)
-        self.label_9.setMinimumSize(QtCore.QSize(95, 0))
+        self.label_9.setMinimumSize(QtCore.QSize(100, 0))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Tahoma"))
         font.setPointSize(9)
@@ -128,6 +128,7 @@ class Ui_Redminer(object):
         self.textEdit_lastCopyTime.setMaximumSize(QtCore.QSize(16777215, 25))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Tahoma"))
+        font.setPointSize(9)
         self.textEdit_lastCopyTime.setFont(font)
         self.textEdit_lastCopyTime.setReadOnly(True)
         self.textEdit_lastCopyTime.setObjectName(_fromUtf8("textEdit_lastCopyTime"))
@@ -397,7 +398,7 @@ class Ui_Redminer(object):
         self.horizontalLayout.setStretch(1, 8)
         Redminer.setCentralWidget(self.centralWidget)
         self.menuBar = QtGui.QMenuBar(Redminer)
-        self.menuBar.setGeometry(QtCore.QRect(0, 0, 915, 21))
+        self.menuBar.setGeometry(QtCore.QRect(0, 0, 915, 25))
         self.menuBar.setObjectName(_fromUtf8("menuBar"))
         self.menuMenu = QtGui.QMenu(self.menuBar)
         self.menuMenu.setObjectName(_fromUtf8("menuMenu"))
@@ -436,7 +437,7 @@ class Ui_Redminer(object):
 
     def retranslateUi(self, Redminer):
         Redminer.setWindowTitle(_translate("Redminer", "RedMiner", None))
-        self.checkBox_source.setText(_translate("Redminer", "Use Local Data Copy (Speed Up)", None))
+        self.checkBox_source.setText(_translate("Redminer", "Use Local Data Copy (Speedup)", None))
         self.label_7.setText(_translate("Redminer", "Project Name  ", None))
         self.comboBox_project.setItemText(0, _translate("Redminer", " Click To Load Project List", None))
         self.label_8.setText(_translate("Redminer", "Data Source     ", None))
@@ -445,7 +446,7 @@ class Ui_Redminer(object):
         self.textEdit_lastCopyTime.setHtml(_translate("Redminer", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'Tahoma\'; font-size:8.25pt; font-weight:400; font-style:normal;\">\n"
+"</style></head><body style=\" font-family:\'Tahoma\'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt;\">N/A</span></p></body></html>", None))
         self.gridGroupBox.setTitle(_translate("Redminer", "Time Panel", None))
         self.label_2.setText(_translate("Redminer", "  End Date", None))
