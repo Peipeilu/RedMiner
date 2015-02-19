@@ -877,7 +877,7 @@ class MainWindow(QMainWindow, Ui_Redminer):
             
 
             if project_name != 'None':
-                project_dict = request_project_list(self.personal_key)
+                project_dict = request_project_dict_for_user(self.personal_key)
                 self.ordered_project_dict = OrderedDict(sorted(project_dict.items(), key=lambda t: t[0]))
                 project_name_list = self.ordered_project_dict.keys()
                 print "project_name", project_name
@@ -887,7 +887,7 @@ class MainWindow(QMainWindow, Ui_Redminer):
                 self.ui.comboBox_project.setCurrentIndex(project_name_index)
                 
                 self.ui.pushButton_project_load.setEnabled(True)
-#                 project_dict = request_project_list(self.personal_key)
+#                 project_dict = request_project_dict_for_user(self.personal_key)
 #                 self.ordered_project_dict = OrderedDict(sorted(project_dict.items(), key=lambda t: t[0]))
 #                 project_name_list = self.ordered_project_dict.keys()
 #                 print project_name_list

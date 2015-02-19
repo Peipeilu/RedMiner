@@ -234,7 +234,10 @@ def write_cache(content, project_name, file_path = None):
     
     temp_content = copy.deepcopy(content)
     temp_content = encode_datetime(temp_content)
-    
+
+    if not os.path.exists(result_path):
+        os.makedirs(result_dir)
+        
     fid = open(result_path, 'w')
     fid.write('%s'%(temp_content))
     fid.close()
@@ -363,14 +366,14 @@ def MyPrintf(msg, Verbose, level):
     Verbose[0] is the level of verbocity requested (e.g., Verbose[0]=None means print nothing, =2 means print messages with <= 2 tabs.
     Verbose[1] is the number of tabs in the prefix: the deeper into function calls you are the more tabs there are.
     """
-#     logfile = pathProgram() + '\\Log\\' + 'log.txt'
-    logfile = os.path.join(pathProgram(),'Log', 'log.txt')
+    logDir = os.path.join(pathProgram(),'Log')
+    logFile = os.path.join(logDir,'log.txt')
     
-    if not os.path.isfile(logfile):
-        fileHandler = open( logfile , 'w' )
-        fileHandler.close()
+    if not os.path.exists(logFile):
+        os.makedirs(logDir)
+        fileHandler = open(logFile,'w').close() 
         
-    fileHandler = open( logfile , 'a' )
+    fileHandler = open(logFile,'a')
 
     curTime = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
 
@@ -507,13 +510,17 @@ def saveCredential(credential = None, file_path = None):
     if file_path:
         full_path = file_path
     else:
-        full_path = os.path.join(pathProgram(), "Setting", "personal_key")
+        full_dir = os.path.join(pathProgram(), "Setting")
+        full_path = os.path.join(full_dir, "personal_key")
 
     MyPrint("Save Credential from path-%s"%(full_path))    
     
+    if not os.path.exists(full_path):
+        os.makedirs(full_dir)
 
     f = open(full_path,"w")
     f.write(credential)
+    f.close()
     return full_path
  
 def cleanCredential(file_path = None):

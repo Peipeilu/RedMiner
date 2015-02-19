@@ -20,7 +20,7 @@ class Project_Loader(QtCore.QThread):
     def run(self):
         print "Project_Loader runs"
         try:    
-            self.project_dict = request_project_list(self.personal_key)
+            self.project_dict = request_project_dict_for_user(self.personal_key)
             
         except Exception, ex:
             MyPrint("Message:%s" %(ex), level = 'ERROR')
