@@ -24,7 +24,7 @@ def check_credential_sim(credential):
 
 def check_credential_complete(credential):
     try:
-        project_dict = request_project_list(credential)
+        project_dict = request_project_num_for_user(credential)
     except:        
         return False
     else:
@@ -455,8 +455,52 @@ def generate_url(request, personal_key):
     print request_url
     
     return request_url
+
+def request_project_num_for_user(personal_key):
+    """
+    NEW
     
-def request_project_list(personal_key = None):
+    Return the total number of project which can
+    be accessed by user
+    
+    personal_key (str)
+    the user's credential key
+    
+    """
+    request = '/projects.xml?limit=1'
+    request_url = generate_url(request, personal_key)
+    xml = urllib.urlopen(request_url)
+#         print_dom(minidom.parse(xml))
+    tree = ET.parse(xml) 
+    root = tree.getroot()       
+    attrib_dict = root.attrib
+    return int(attrib_dict['total_count'])
+
+def request_project_dict_for_user(personal_key, total_project_num = None):
+    """
+    NEW
+    
+    Scan all issues can be accessed by a certain API Key 
+    and return a list of all project numbers 
+ 
+    personal_key (str)
+        the user's credential key
+    
+    """
+    request_project_num = 0   
+    project_dict = {}    
+    
+    if not total_project_num:
+        total_project_num = request_project_num_for_user(personal_key)
+        
+    while request_project_num < total_project_num:
+        project_list_part = request_project_list(request_project_num, personal_key)
+        project_dict.update(project_list_part)
+        request_project_num = request_project_num + 100
+        
+    return project_dict
+ 
+def request_project_list(offset_num, personal_key):
     """
     Return the dictionary that can be accessed by a certain credential key. 
     Key is the project name and value is the project number.
@@ -468,15 +512,13 @@ def request_project_list(personal_key = None):
         the user's credential key
     
     """
-    request = '/projects.xml?limit=100'
+    request = '/projects.xml?offset=%s&limit=100' %(offset_num)
+    request_url = generate_url(request, personal_key)    
     
     project_name_id_dict = {}
     
-    request_url = generate_url(request, personal_key)
-    
     xml = urllib.urlopen(request_url)
 #         print_dom(minidom.parse(xml))
-
     tree = ET.parse(xml) 
     root = tree.getroot()
     
@@ -487,7 +529,6 @@ def request_project_list(personal_key = None):
         
     return project_name_id_dict
     
-
 def request_status_dict(personal_key):
     """
     Return the project status list on Redmine.
