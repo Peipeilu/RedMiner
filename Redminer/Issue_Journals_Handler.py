@@ -148,19 +148,23 @@ class Filter_Issue_Journals(QtCore.QThread):
         self.issue_journals_dict = issue_journals_dict
         
     def run(self):
+        
+        print "*******attribute_select********\n", self.attribute_select,"\n"
+        
         self.send_message.emit("Start screening issue journals")
 # Date filter  
         numdays = (self.end_date - self.start_date).days
         date_list = [self.start_date + timedelta(days = x) for x in range(0, numdays + 1, self.step_date)]
-        print "***** date list *****\n", date_list
+        
+        print "***** date list *****\n", date_list,"\n"
         
 # Status filter        
         if 'Status_ID' in self.attribute_select.keys():
             status_id_selection = self.attribute_select['Status_ID']
             status_name_selection = self.attribute_select['Status_Name']
         else:
-            status_id_selection = []
-            status_name_selection = []
+            status_id_selection = 'INVALID'
+            status_name_selection = 'INVALID'
                  
         print "***** status ID selection list *****\n", status_id_selection,"\n"
 # Category filter
@@ -169,8 +173,8 @@ class Filter_Issue_Journals(QtCore.QThread):
             category_id_selection = self.attribute_select['Category_ID']
             category_name_selection = self.attribute_select['Category_Name']
         else:
-            category_id_selection = []
-            category_name_selection = []
+            category_id_selection = ['INVALID']
+            category_name_selection = ['INVALID']
             
         print "***** category selection list *****\n", category_id_selection,"\n"
 
@@ -178,7 +182,7 @@ class Filter_Issue_Journals(QtCore.QThread):
         if 'Severity_Name' in self.attribute_select.keys():
             severity_name_selection = self.attribute_select['Severity_Name']
         else:
-            severity_name_selection = []
+            severity_name_selection = 'INVALID'
             
         print "***** severity selection list *****\n", severity_name_selection,"\n"
         
@@ -186,16 +190,16 @@ class Filter_Issue_Journals(QtCore.QThread):
         self.send_message.emit("Start generating severity results")
         time.sleep(0.5)
         
-        excel_header_list = ['Date','SUM', 'S1', 'S2', 'S3', 'S4', 'S5']
+        excel_header_list = ['Date','SUM'] + severity_name_selection
+        
         content_lists = []
         content_list = []
         counter = []
-        
-        content_list = [excel_header_list[index] for index in range(len(severity_name_selection)+2)]
-        content_lists.append(content_list)
+#         content_list = [excel_header_list[index] for index in range(len(severity_name_selection)+2)]
+        content_lists.append(excel_header_list)
         
         for select_datetime in date_list:
-            counter = [0]*6
+            counter = [0]*7
             issues_S5 = []
             
             for key,value in self.issue_journals_dict.iteritems():
@@ -205,13 +209,13 @@ class Filter_Issue_Journals(QtCore.QThread):
                 last_category_id = search_latest_attribute(select_datetime, value['category_changes'])
                 last_severity_name = search_latest_attribute(select_datetime, value['severity_changes'])
                 
-                if category_id_selection and (last_category_id not in category_id_selection):
+                if  ('INVALID' not in category_id_selection) and (last_category_id not in category_id_selection):
                     continue
                     
-                if status_id_selection and (last_status_id not in status_id_selection):
+                if last_status_id not in status_id_selection:
                     continue
                 
-                if severity_name_selection and (last_severity_name not in severity_name_selection):
+                if last_severity_name not in severity_name_selection:
                     continue
                 
                 # Sum Counter
@@ -231,15 +235,16 @@ class Filter_Issue_Journals(QtCore.QThread):
                     
                 elif last_severity_name == "S5":                
                     counter[5] = counter[5] + 1
-        
-                    issues_S5.append(issue) # For Debugging
-                else:
-                    print "last_severity_name-->",last_severity_name, type(last_severity_name)
+#                     issues_S5.append(issue) # For Debugging
+
+                else:   #For Undefined severity
+                    counter[6] = counter[6] + 1
+#                     print "last_severity_name-->",last_severity_name, type(last_severity_name)
                         
 #             print "[%s] | S1:%d | S2:%d | S3:%d | S4:%d | S5:%d | SUM:%d | issues_S5:%s" %(select_datetime, counter[1], counter[2], counter[3], counter[4], counter[5], counter[0] , issues_S5)
 #             print "[%s] | S1:%d | S2:%d | S3:%d | S4:%d | S5:%d | SUM:%d | issue_closed:%s" %(select_datetime, counter[1], counter[2], counter[3], counter[4], counter[5], counter[0] , issue_closed)
-            print "[%s] | S1:%d | S2:%d | S3:%d | S4:%d | S5:%d | SUM:%d |" %(
-                  select_datetime, counter[1], counter[2], counter[3], counter[4], counter[5], counter[0])
+            print "[%s] | S1:%d | S2:%d | S3:%d | S4:%d | S5:%d | Not Defined:%d | SUM:%d |" %(
+                  select_datetime, counter[1], counter[2], counter[3], counter[4], counter[5],counter[6], counter[0])
              
             content_list = [str(counter[index]) for index in range(len(severity_name_selection) + 1)]
             content_list.insert(0, str(select_datetime))
@@ -254,17 +259,17 @@ class Filter_Issue_Journals(QtCore.QThread):
         if status_name_selection: 
             status_list_str = 'Status: '+'|'.join(status_name_selection)
         else:
-            status_list_str = 'Status: '+'All'
+            status_list_str = 'Status: '+'None'
         
         if category_name_selection:
             category_list_str = 'Category: '+'|'.join(category_name_selection)
         else:
-            category_list_str = 'Category: '+'All'
+            category_list_str = 'Category: '+'None'
         
         if severity_name_selection:
             severity_list_str = 'Severity: '+'|'.join(severity_name_selection)
         else:
-            severity_list_str = 'Severity: '+'All'
+            severity_list_str = 'Severity: '+'None'
             
         print status_list_str
         print category_list_str

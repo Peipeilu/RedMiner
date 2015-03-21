@@ -125,6 +125,8 @@ class MainWindow(QMainWindow, Ui_Redminer):
         
         clean_log()
         
+        create_folders()
+        
         ready_credential = loadCredential()
         
         if not ready_credential:
@@ -268,16 +270,14 @@ class MainWindow(QMainWindow, Ui_Redminer):
         if not check_connectivity("http://www.google.com"):
             self.__show_warning_message("The Internet is unreachable. Please check network connection.")
         else:
-            if self.mutex.tryLock():
+            if self.mutex.tryLock():    
                 self.ui.comboBox_project.setEnabled(False)
+                
                 if self.personal_key:
-                    if check_credential_complete(self.personal_key):
-                        self.load_project_list()
-                    else:
-                        self.__show_warning_message("Invalid credential key. Please set a valid one.")
+                    self.load_project_list()
                 else:
                     self.__show_warning_message("No credential key found. Please set one first.")
-#                     self.ui.comboBox_project.setEnabled(True)
+
                     self.mutex.unlock()
         
     def on_select_project(self):            
@@ -301,14 +301,14 @@ class MainWindow(QMainWindow, Ui_Redminer):
             self.status_dict = OrderedDict(sorted(status_dict_random.items(), key=lambda t: t[1].upper()))
             
             # Severity
-            self.severity_list = ["S1","S2","S3","S4","S5"]
+            self.severity_list = ["S1","S2","S3","S4","S5","Not Defined"]
             
             # Category
             category_dict_random = request_category_dict(self.current_project_id ,self.personal_key)
             if category_dict_random:
                 self.category_dict = OrderedDict(sorted(category_dict_random.items(), key=lambda t: t[1].upper()))
             else:
-                self.category_dict = None
+                self.category_dict = 'INVALID'
             
             last_cache_time = check_cache(self.current_project_name)
             
@@ -716,8 +716,8 @@ class MainWindow(QMainWindow, Ui_Redminer):
         selection_ids  = self.selection_window.select_id_list
         self.attribute_select_dict.update({self.attribute_id: selection_ids})
         
-        MyPrint( "%s Name:%s" %( self.attribute_title,selection_names),level = "NORMAL")
-        MyPrint( "%s ID  :%s" %( self.attribute_title,selection_ids),  level = "NORMAL")
+        MyPrint( "%s Name:%s" %( self.attribute_title, selection_names), level = "NORMAL")
+        MyPrint( "%s ID  :%s" %( self.attribute_title, selection_ids), level = "NORMAL")
         
         self.print_to_console("%s:%s" %(self.attribute_title, selection_names))
         self.check_all_filter_set()
@@ -755,7 +755,7 @@ class MainWindow(QMainWindow, Ui_Redminer):
             self.ui.pushButton_status_switch.setIcon(QtGui.QIcon(self.icon_ban))
             self.ui.pushButton_status_select.setEnabled(False)
         
-        if self.category_dict:
+        if self.category_dict != 'INVALID':
             if "Category_Name" in self.attribute_select_dict.keys():
                 attribute_ready_counter = attribute_ready_counter + 1
                 self.ui.pushButton_category_switch.setIcon(QtGui.QIcon(self.icon_check))
@@ -925,7 +925,7 @@ class MainWindow(QMainWindow, Ui_Redminer):
             accuracy = param_list[4][1]
             
             if project_name != 'None':
-                project_dict = request_project_list(self.personal_key)
+                project_dict = request_project_dict_for_user(self.personal_key)
                 self.ordered_project_dict = OrderedDict(sorted(project_dict.items(), key=lambda t: t[0].upper()))
                 project_name_list = self.ordered_project_dict.keys()
                 print "project_name", project_name
@@ -935,7 +935,7 @@ class MainWindow(QMainWindow, Ui_Redminer):
                 self.ui.comboBox_project.setCurrentIndex(project_name_index)
                 
                 self.ui.pushButton_project_load.setEnabled(True)
-#                 project_dict = request_project_list(self.personal_key)
+#                 project_dict = request_project_dict_for_user(self.personal_key)
 #                 self.ordered_project_dict = OrderedDict(sorted(project_dict.items(), key=lambda t: t[0]))
 #                 project_name_list = self.ordered_project_dict.keys()
 #                 print project_name_list

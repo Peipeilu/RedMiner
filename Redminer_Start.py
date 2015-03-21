@@ -8,7 +8,6 @@ from Redminer import Main_Window
 
 if __name__ == '__main__':
     app = PyQt4.QtGui.QApplication(sys.argv)
-#     app.setStyle(QStyleFactory.create("plastique"))
     myapp = Main_Window.MainWindow()
     myapp.show()
     
@@ -19,7 +18,6 @@ if __name__ == '__main__':
         print 'Restarting App'
         global myapp
         myapp.deleteLater()
-#         myapp.close()
         myapp = Main_Window.MainWindow()
         myapp.show()
 

@@ -14,15 +14,11 @@ EventLevel = {'NORMAL':0 ,'DEBUG': 1, 'ERROR': 3, 'FATAL': 4}
 
 MinLevel = 'ERROR'
 
-# Five levels for log recording
-# Level-1:Normal *
+# Four levels for log recording
+# Level-1:NORMAL
 # Level-2:DEBUG
-# Level-3:INFO
 # Level-4:ERROR
 # Level-5:FATAL
-# Level-6:NONE *
-# ALL < DEBUG < INFO < ERROR < FATAL < NONE
-
 
 # Widgets --------------------------------------------------------------------------
 class MyComboBox(QtGui.QComboBox):
@@ -241,7 +237,7 @@ def write_cache(content, project_name):
     
     temp_content = copy.deepcopy(content)
     temp_content = encode_datetime(temp_content)
-    
+ 
     fid = open(cache_path, 'w')
     fid.write('%s'%(temp_content))
     fid.close()
@@ -433,7 +429,7 @@ def clean_log():
     fileHandler = open( logfile , 'w' )
     fileHandler.close()
 
-def MyPrint(msg, Verbose=(0,0), level = 'DEBUG'):
+def MyPrint(msg, Verbose=(0,0), level = 'NORMAL'):
     if  EventLevel[level] >= EventLevel[MinLevel]:
         MyPrintf(msg, Verbose, level)
 
@@ -447,7 +443,7 @@ def MyPrintf(msg, Verbose, level):
     if not os.path.isfile(logfile):
         fileHandler = open( logfile , 'w' )
         fileHandler.close()
-        
+         
     fileHandler = open( logfile , 'a' )
 
     curTime = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
@@ -478,6 +474,19 @@ def MyPrintf(msg, Verbose, level):
         
     fileHandler.close()   
 
+def create_folders():
+    log_dir = os.path.join(pathProgram(),'Log')
+    tmp_dir = os.path.join(pathProgram(),'Temp')
+    setting_dir = os.path.join(pathProgram(), "Setting")
+    result_dir = os.path.join(pathProgram(), "Result")
+    
+    dir_list = [log_dir, tmp_dir, result_dir, setting_dir]
+    
+    for dir in dir_list:
+        if not os.path.exists(dir):
+            os.makedirs(dir)
+            MyPrintf("Create Directory %s" %(dir), level = "NORMAL")
+    
 def is_interger(s):
     try:
         int(s)

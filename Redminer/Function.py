@@ -24,11 +24,11 @@ def check_credential_sim(credential):
 
 def check_credential_complete(credential):
     try:
-        project_dict = request_project_num_for_user(credential)
+        project_total_num = request_project_num_for_user(credential)
     except:        
         return False
     else:
-        return True
+        return project_total_num
     
 def search_start_datetime(issue_journals_dict):
     """
@@ -222,7 +222,7 @@ def request_issue_journals(issue_num, personal_key):    #FIXME BELOW
     first_value_category = ""
     
     xml = urllib.urlopen(request_url)
-#         print_dom(minidom.parse(xml))
+#     print_dom(minidom.parse(xml))
     
     tree = ET.parse(xml) 
     root = tree.getroot()
@@ -438,7 +438,7 @@ def generate_url(request, personal_key):
     """
     Return the complete url for different request.
  
-    request (int)
+    request (str)
         the core short request path (ignore the website prefix and key attribute postfix) 
     
     personal_key (str)
@@ -455,7 +455,7 @@ def generate_url(request, personal_key):
     print request_url
     
     return request_url
-
+    
 def request_project_num_for_user(personal_key):
     """
     NEW
@@ -463,8 +463,13 @@ def request_project_num_for_user(personal_key):
     Return the total number of project which can
     be accessed by user
     
+    PARAMETER DEFINITION
+    
     personal_key (str)
     the user's credential key
+    
+    RETURN FORMAT (str)
+    the total number of project
     
     """
     request = '/projects.xml?limit=1'
@@ -474,7 +479,8 @@ def request_project_num_for_user(personal_key):
     tree = ET.parse(xml) 
     root = tree.getroot()       
     attrib_dict = root.attrib
-    return int(attrib_dict['total_count'])
+    
+    return str(attrib_dict['total_count'])
 
 def request_project_dict_for_user(personal_key, total_project_num = None):
     """
@@ -486,6 +492,9 @@ def request_project_dict_for_user(personal_key, total_project_num = None):
     personal_key (str)
         the user's credential key
     
+    optional - total_project_num (str)
+        total project number to be manually set
+    
     """
     request_project_num = 0   
     project_dict = {}    
@@ -493,6 +502,9 @@ def request_project_dict_for_user(personal_key, total_project_num = None):
     if not total_project_num:
         total_project_num = request_project_num_for_user(personal_key)
         
+    total_project_num = int(total_project_num)
+    MyPrint( "--> Total Project Number: %d" %(total_project_num), level='NORMAL')
+    
     while request_project_num < total_project_num:
         project_list_part = request_project_list(request_project_num, personal_key)
         project_dict.update(project_list_part)
@@ -502,11 +514,13 @@ def request_project_dict_for_user(personal_key, total_project_num = None):
  
 def request_project_list(offset_num, personal_key):
     """
+    UPDATE
+    
     Return the dictionary that can be accessed by a certain credential key. 
     Key is the project name and value is the project number.
  
-    request (str)
-        the core short request path (ignore the website prefix and key attribute postfix) 
+    offset_num (str)
+        starting point offset number
     
     personal_key (str)
         the user's credential key
@@ -695,33 +709,33 @@ def __old_request_issue_list_for_project(project_num, personal_key):
 
 
 if __name__ == '__main__':
-    pass
+    API_Key = '92a0618f19ec413438e4b5b3a3847ce1cd88c67a'
 #     __request_issue_list(project_num=292 , offset_num=100, personal_key="92a0618f19ec413438e4b5b3a3847ce1cd88c67a" )
 #     print build_issue_journals_for_project(292, "92a0618f19ec413438e4b5b3a3847ce1cd88c67a",300)
 #     print request_category_dict(291, "92a0618f19ec413438e4b5b3a3847ce1cd88c67a")
-#     print request_issue_journals(29222, "92a0618f19ec413438e4b5b3a3847ce1cd88c67a")
+    print request_issue_journals(31111, "92a0618f19ec413438e4b5b3a3847ce1cd88c67a")
     
     
-    issue_travel_dict = {
-                         21717:{
-                                'severity_changes': [['12/11/2013_02:32:36', 'Not Defined', 'S3']], 
-                                'status_changes': [['12/11/2013_02:32:36', 'Not Defined', '2']], 
-                                'priority_changes': [['12/11/2013_02:32:36', 'Not Defined', 'P1']], 
-                                'category_changes': [['12/11/2013_02:32:36', 'Not Defined', '352'], 
-                                                     ['10/02/2014_10:03:29', '352', '435'], 
-                                                     ['10/03/2014_10:15:14', '435', 'Not Defined'], 
-                                                     ['10/30/2014_10:10:47', 'Not Defined', '423']]
-                                },
-                         }
-         
-    from Utility import *
-    
-    new_issue_travel_dict = decode_datetime(issue_travel_dict)
-    
-    select_datetime = datetime.strptime('12 30 2013', '%m %d %Y')
-    print 'select_datetime', type(select_datetime)
-    
-    for key,value in new_issue_travel_dict[21717].iteritems():
-        print search_latest_attribute(select_datetime, value)
+#     issue_travel_dict = {
+#                          21717:{
+#                                 'severity_changes': [['12/11/2013_02:32:36', 'Not Defined', 'S3']], 
+#                                 'status_changes': [['12/11/2013_02:32:36', 'Not Defined', '2']], 
+#                                 'priority_changes': [['12/11/2013_02:32:36', 'Not Defined', 'P1']], 
+#                                 'category_changes': [['12/11/2013_02:32:36', 'Not Defined', '352'], 
+#                                                      ['10/02/2014_10:03:29', '352', '435'], 
+#                                                      ['10/03/2014_10:15:14', '435', 'Not Defined'], 
+#                                                      ['10/30/2014_10:10:47', 'Not Defined', '423']]
+#                                 },
+#                          }
+#          
+#     from Utility import *
+#     
+#     new_issue_travel_dict = decode_datetime(issue_travel_dict)
+#     
+#     select_datetime = datetime.strptime('12 30 2013', '%m %d %Y')
+#     print 'select_datetime', type(select_datetime)
+#     
+#     for key,value in new_issue_travel_dict[21717].iteritems():
+#         print search_latest_attribute(select_datetime, value)
         
-    
+#     request_project_dict_for_user(API_Key, 210)
