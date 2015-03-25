@@ -141,6 +141,28 @@ def request_issue_num(project_num, personal_key):
     
     return int(root.get("total_count"))
 
+def request_tracker_dict(personal_key):
+    request = '/trackers.xml' 
+    
+    request_url = generate_url(request, personal_key)
+
+    xml = urllib.urlopen(request_url)  
+#     print_dom(minidom.parse(xml))  
+    
+    tree = ET.parse(xml) 
+    root = tree.getroot()    
+    
+    tracker_dict = {}
+    
+    for tracker in root.getiterator('tracker'):
+        tracker_id = str(tracker.find('id').text)
+        tracker_name = str(tracker.find('name').text)
+    
+        tracker_dict.update({tracker_id: tracker_name})
+        
+    print tracker_dict
+    return tracker_dict
+
 def request_issue_list_for_project(project_num, personal_key, total_issue_num):
     """
     Scan all issues under a certain project and return a list of 
@@ -196,6 +218,7 @@ def request_issue_journals(issue_num, personal_key):    #FIXME BELOW
     severity_changes = []
     priority_changes = []
     category_changes = []
+    tracker_changes = []
     
     journal_change = {}
     
@@ -203,6 +226,7 @@ def request_issue_journals(issue_num, personal_key):    #FIXME BELOW
     priority_scan = True
     status_scan = True
     category_scan = True
+    tracker_scan = True
     
     old_value_status = ""
     new_value_status = ""
@@ -210,16 +234,20 @@ def request_issue_journals(issue_num, personal_key):    #FIXME BELOW
     new_value_severity = ""
     old_value_priority = ""
     new_value_priority = ""
+    old_value_tracker = ""
+    new_value_tracker = ""
     
     first_severity_change_flag = True
     first_status_change_flag   = True
     first_priority_change_flag = True
     first_category_change_flag = True
+    first_tracker_change_flag = True
     
     first_value_status = ""
     first_value_severity = ""
     first_value_priority = ""
     first_value_category = ""
+    first_value_tracker = ""
     
     xml = urllib.urlopen(request_url)
 #     print_dom(minidom.parse(xml))
@@ -231,20 +259,24 @@ def request_issue_journals(issue_num, personal_key):    #FIXME BELOW
     priority_current = 'Not Defined'
     status_current   = 'Not Defined'
     category_current = 'Not Defined'
-    
+    tracker_current  = 'Not Defined'
+        
     for custom_field in root.getiterator('custom_field'):  
             if custom_field.get('name') == "Seagate Severity" or custom_field.get('id') == "65":
                 severity_current = custom_field.find('value').text
 
             if custom_field.get('name') == "Seagate Priority" or custom_field.get('id') == "64":
                 priority_current = custom_field.find('value').text
-    
+
     if root.find('status') != None:
         status_current = root.find('status').get('id')  # Status ID number
     
     if root.find('category') != None:
         category_current = root.find('category').get('id')  # Category ID number
-    
+  
+    if root.find('tracker') != None:
+        tracker_current = root.find('tracker').get('id')  # Category ID number
+            
 # PRESCAN THE HEADER TO IGNORE USELESS WORK - START
     # check if value is "Not Defined" or blank character
     if status_current is "Not Defined" or not status_current: # Skip scanning detail if current status is "Not Defined" OR ""
@@ -270,6 +302,12 @@ def request_issue_journals(issue_num, personal_key):    #FIXME BELOW
         first_value_category = "Not Defined"
     else:
         first_value_category = category_current
+
+    if tracker_current is "Not Defined" or not tracker_current:
+        tracker_scan = False
+        first_value_tracker = "Not Defined"
+    else:
+        first_value_tracker = tracker_current
 
 # PRESCAN THE HEADER TO IGNORE USELESS WORK - END
     for journal in root.getiterator('journal'):
@@ -316,7 +354,7 @@ def request_issue_journals(issue_num, personal_key):    #FIXME BELOW
                     first_priority_change_flag = False
                     
                 MyPrint( "(%s) Priority | old -> new : %s -> %s" %(created_time, old_value_priority, new_value_priority), level='DEBUG')
-            
+
             elif category_scan and detail.get('name') == "category_id":
                 
                 old_value_category = detail.find('old_value').text if detail.find('old_value').text else "Not Defined"
@@ -329,6 +367,19 @@ def request_issue_journals(issue_num, personal_key):    #FIXME BELOW
                     first_value_category = old_value_category
                     
                 MyPrint( "(%s) Category | old -> new : %s -> %s" %(created_time, old_value_category, new_value_category), level='DEBUG')
+
+            elif tracker_scan and (detail.get('name') == "tracker_id" or detail.get('name') == "1"):
+                
+                old_value_tracker = detail.find('old_value').text if detail.find('old_value').text else "Not Defined"
+                new_value_tracker = detail.find('new_value').text if detail.find('new_value').text else "Not Defined"
+
+                tracker_changes.append([created_time,old_value_tracker,new_value_tracker])      
+                
+                if first_tracker_change_flag:
+                    first_tracker_change_flag = False
+                    first_value_tracker = old_value_tracker
+                    
+                MyPrint( "(%s) Tracker | old -> new : %s -> %s" %(created_time, old_value_tracker, new_value_tracker), level='DEBUG')
                    
 # ADD IN INITIAL ISSUE ATTRIBUTES - START
     created_on = root.find('created_on').text
@@ -361,13 +412,23 @@ def request_issue_journals(issue_num, personal_key):    #FIXME BELOW
     category_changes.insert(0, [created_time,old_value_category,new_value_category])
     
     MyPrint( "(%s) Category | old -> new : %s -> %s" %(created_time, old_value_category, new_value_category), level='DEBUG')
-      
+
+    old_value_tracker = "Not Defined"
+    new_value_tracker = first_value_tracker
+    
+    tracker_changes.insert(0, [created_time,old_value_tracker,new_value_tracker])
+    
+    MyPrint( "(%s) Category | old -> new : %s -> %s" %(created_time, old_value_tracker, new_value_tracker), level='DEBUG')
+
 # ADD IN INITIAL ISSUE ATTRIBUTES - END
 
-    journal_change = {"status_changes":status_changes, "severity_changes": severity_changes, 
-                      "priority_changes":priority_changes, "category_changes": category_changes }
-    
-    print "-----------------------------"    
+    journal_change = {
+                      "status_changes":status_changes, 
+                      "severity_changes": severity_changes, 
+                      "priority_changes":priority_changes, 
+                      "category_changes": category_changes, 
+                      "tracker_changes":tracker_changes 
+                      }
     
     return journal_change
 
@@ -713,8 +774,9 @@ if __name__ == '__main__':
 #     __request_issue_list(project_num=292 , offset_num=100, personal_key="92a0618f19ec413438e4b5b3a3847ce1cd88c67a" )
 #     print build_issue_journals_for_project(292, "92a0618f19ec413438e4b5b3a3847ce1cd88c67a",300)
 #     print request_category_dict(291, "92a0618f19ec413438e4b5b3a3847ce1cd88c67a")
-    print request_issue_journals(31111, "92a0618f19ec413438e4b5b3a3847ce1cd88c67a")
+    print request_issue_journals(31111, API_Key)
     
+#     request_tracker_dict(API_Key)
     
 #     issue_travel_dict = {
 #                          21717:{

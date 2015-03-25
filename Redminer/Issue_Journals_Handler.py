@@ -166,7 +166,16 @@ class Filter_Issue_Journals(QtCore.QThread):
             status_id_selection = 'INVALID'
             status_name_selection = 'INVALID'
                  
-        print "***** status ID selection list *****\n", status_id_selection,"\n"
+        print "***** status ID selection list *****\n", status_id_selection,"\n" , status_name_selection,"\n"
+        
+# Severity filter
+        if 'Severity_Name' in self.attribute_select.keys():
+            severity_name_selection = self.attribute_select['Severity_Name']
+        else:
+            severity_name_selection = 'INVALID'
+            
+        print "***** severity selection list *****\n", severity_name_selection,"\n"
+        
 # Category filter
         
         if 'Category_ID' in self.attribute_select.keys():
@@ -176,15 +185,18 @@ class Filter_Issue_Journals(QtCore.QThread):
             category_id_selection = ['INVALID']
             category_name_selection = ['INVALID']
             
-        print "***** category selection list *****\n", category_id_selection,"\n"
+        print "***** category selection list *****\n", category_id_selection,"\n", category_name_selection,"\n"
 
-# Severity filter
-        if 'Severity_Name' in self.attribute_select.keys():
-            severity_name_selection = self.attribute_select['Severity_Name']
+# Tracker filter
+        
+        if 'Tracker_ID' in self.attribute_select.keys():
+            tracker_id_selection = self.attribute_select['Tracker_ID']
+            tracker_name_selection = self.attribute_select['Tracker_Name']
         else:
-            severity_name_selection = 'INVALID'
+            tracker_id_selection = ['INVALID']
+            tracker_name_selection = ['INVALID']
             
-        print "***** severity selection list *****\n", severity_name_selection,"\n"
+        print "***** tracker selection list *****\n", tracker_id_selection,"\n", tracker_name_selection,"\n"        
         
 # Generate result
         self.send_message.emit("Start generating severity results")
@@ -200,21 +212,28 @@ class Filter_Issue_Journals(QtCore.QThread):
         
         for select_datetime in date_list:
             counter = [0]*7
-            issues_S5 = []
+            issues_S1 = []
             
             for key,value in self.issue_journals_dict.iteritems():
                 issue = key
                 
                 last_status_id = search_latest_attribute(select_datetime, value['status_changes'])                
-                last_category_id = search_latest_attribute(select_datetime, value['category_changes'])
                 last_severity_name = search_latest_attribute(select_datetime, value['severity_changes'])
+                last_category_id = search_latest_attribute(select_datetime, value['category_changes'])
+                last_tracker_id = search_latest_attribute(select_datetime, value['tracker_changes'])
                 
+#                 if issue in [10131, 10123, 10063]:
+#                     print "*********[%d]%s|%s|%s" %(issue, last_status_id, last_category_id, last_severity_name)
+                    
                 if  ('INVALID' not in category_id_selection) and (last_category_id not in category_id_selection):
                     continue
-                    
+
                 if last_status_id not in status_id_selection:
                     continue
-                
+             
+                if last_tracker_id not in tracker_id_selection:
+                    continue
+
                 if last_severity_name not in severity_name_selection:
                     continue
                 
@@ -223,6 +242,7 @@ class Filter_Issue_Journals(QtCore.QThread):
     
                 if   last_severity_name == "S1":
                     counter[1] = counter[1] + 1
+                    issues_S1.append(issue) # For Debugging
                     
                 elif last_severity_name == "S2":
                     counter[2] = counter[2] + 1
@@ -235,7 +255,6 @@ class Filter_Issue_Journals(QtCore.QThread):
                     
                 elif last_severity_name == "S5":                
                     counter[5] = counter[5] + 1
-#                     issues_S5.append(issue) # For Debugging
 
                 else:   #For Undefined severity
                     counter[6] = counter[6] + 1
@@ -243,8 +262,8 @@ class Filter_Issue_Journals(QtCore.QThread):
                         
 #             print "[%s] | S1:%d | S2:%d | S3:%d | S4:%d | S5:%d | SUM:%d | issues_S5:%s" %(select_datetime, counter[1], counter[2], counter[3], counter[4], counter[5], counter[0] , issues_S5)
 #             print "[%s] | S1:%d | S2:%d | S3:%d | S4:%d | S5:%d | SUM:%d | issue_closed:%s" %(select_datetime, counter[1], counter[2], counter[3], counter[4], counter[5], counter[0] , issue_closed)
-            print "[%s] | S1:%d | S2:%d | S3:%d | S4:%d | S5:%d | Not Defined:%d | SUM:%d |" %(
-                  select_datetime, counter[1], counter[2], counter[3], counter[4], counter[5],counter[6], counter[0])
+            print "[%s] | S1:%d | S2:%d | S3:%d | S4:%d | S5:%d | Not Defined:%d | SUM:%d | issues_S1:%s" %(
+                  select_datetime, counter[1], counter[2], counter[3], counter[4], counter[5],counter[6], counter[0], issues_S1)
              
             content_list = [str(counter[index]) for index in range(len(severity_name_selection) + 1)]
             content_list.insert(0, str(select_datetime))
@@ -270,14 +289,21 @@ class Filter_Issue_Journals(QtCore.QThread):
             severity_list_str = 'Severity: '+'|'.join(severity_name_selection)
         else:
             severity_list_str = 'Severity: '+'None'
+
+        if tracker_name_selection:
+            tracker_list_str = 'Tracker: '+'|'.join(tracker_name_selection)
+        else:
+            tracker_list_str = 'Tracker: '+'None'
             
         print status_list_str
-        print category_list_str
         print severity_list_str
+        print tracker_list_str
+        print category_list_str
         
         content_lists.append([status_list_str])
         content_lists.append([category_list_str])
         content_lists.append([severity_list_str])
+        content_lists.append([tracker_list_str])
             
         result_path = write_csv(content_lists, "SEVERITY", self.project_name)
         self.send_result_path.emit(result_path)

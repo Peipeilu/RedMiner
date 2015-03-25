@@ -81,6 +81,7 @@ class MainWindow(QMainWindow, Ui_Redminer):
         self.project_journal_loading = False
         self.severity_list = None
         self.issue_journals_dict = None
+        self.tracker_dict = None
         
     def initilze(self):
         '''
@@ -95,14 +96,17 @@ class MainWindow(QMainWindow, Ui_Redminer):
         self.ui.pushButton_status_switch.setIcon(QtGui.QIcon(self.icon_pending))
         self.ui.pushButton_category_switch.setIcon(QtGui.QIcon(self.icon_pending))
         self.ui.pushButton_severity_switch.setIcon(QtGui.QIcon(self.icon_pending))
-        
+        self.ui.pushButton_tracker_switch.setIcon(QtGui.QIcon(self.icon_pending))
+     
         self.ui.pushButton_status_switch.setStyleSheet('border: 0px; padding: 0px;')
         self.ui.pushButton_category_switch.setStyleSheet('border: 0px; padding: 0px;')
         self.ui.pushButton_severity_switch.setStyleSheet('border: 0px; padding: 0px;')
+        self.ui.pushButton_tracker_switch.setStyleSheet('border: 0px; padding: 0px;')
         
         self.ui.pushButton_status_switch.setCursor(QtCore.Qt.ArrowCursor)
         self.ui.pushButton_category_switch.setCursor(QtCore.Qt.ArrowCursor)
         self.ui.pushButton_severity_switch.setCursor(QtCore.Qt.ArrowCursor)
+        self.ui.pushButton_tracker_switch.setCursor(QtCore.Qt.ArrowCursor)
         
         self.__disable_control_panel()
         self.__disable_filter_panel()
@@ -192,12 +196,14 @@ class MainWindow(QMainWindow, Ui_Redminer):
         self.ui.pushButton_status_select.setEnabled(False)
         self.ui.pushButton_category_select.setEnabled(False)
         self.ui.pushButton_severity_select.setEnabled(False)
-
+        self.ui.pushButton_tracker_select.setEnabled(False)
+        
     def __enable_filter_panel(self):
         self.ui.pushButton_status_select.setEnabled(True)
-        self.ui.pushButton_category_select.setEnabled(True)
         self.ui.pushButton_severity_select.setEnabled(True)
-
+        self.ui.pushButton_tracker_select.setEnabled(True)
+        self.ui.pushButton_category_select.setEnabled(True)
+        
     def __disable_control_panel(self):
         self.ui.pushButton_run.setEnabled(False)
         self.ui.pushButton_stop.setEnabled(False)
@@ -298,8 +304,11 @@ class MainWindow(QMainWindow, Ui_Redminer):
             
             # Status
             status_dict_random = request_status_dict(self.personal_key)
-            self.status_dict = OrderedDict(sorted(status_dict_random.items(), key=lambda t: t[1].upper()))
-            
+            if status_dict_random:
+                self.status_dict = OrderedDict(sorted(status_dict_random.items(), key=lambda t: t[1].upper()))
+            else:
+                self.status_dict = 'INVALID'
+                            
             # Severity
             self.severity_list = ["S1","S2","S3","S4","S5","Not Defined"]
             
@@ -309,6 +318,13 @@ class MainWindow(QMainWindow, Ui_Redminer):
                 self.category_dict = OrderedDict(sorted(category_dict_random.items(), key=lambda t: t[1].upper()))
             else:
                 self.category_dict = 'INVALID'
+            
+            # Tracker
+            tracker_dict_random = request_tracker_dict(self.personal_key)
+            if tracker_dict_random:
+                self.tracker_dict = OrderedDict(sorted(tracker_dict_random.items(), key=lambda t: t[1].upper()))
+            else:
+                self.tracker_dict = 'INVALID'
             
             last_cache_time = check_cache(self.current_project_name)
             
@@ -325,7 +341,6 @@ class MainWindow(QMainWindow, Ui_Redminer):
             
             if not self.setting_loaded:   # If switch between different projects.
                 self.attribute_select_dict.pop("Category_Name", None)
-            
 #             self.setting_loaded = False
 
         else:
@@ -460,10 +475,13 @@ class MainWindow(QMainWindow, Ui_Redminer):
                         self.ui.checkBox_source.setCheckState(Qt.Unchecked)
                         self.__disable_loading_panel()
                         self.ui.pushButton_project_load.setEnabled(True)
+                        #FIX ME
+                        
             else:
                 message = "The local data copy was generated at least one week before.\nDo you want to download newest data from server again?"
                 if self.__show_question_message(message):   # if user select "Yes"                
                     download_server_data()
+                    #FIX ME
                 else:
                     load_local_copy()
                     self.ui.checkBox_source.setCheckState(Qt.Checked)
@@ -504,7 +522,6 @@ class MainWindow(QMainWindow, Ui_Redminer):
     def __on_processing_results(self, results):
         self.issue_journals_dict = results
         start_date_string = search_start_datetime(self.issue_journals_dict)
-        print 'start_date_string -->', start_date_string
         
         today = time.strftime('%Y-%m-%d',time.localtime(time.time()))
         if start_date_string:
@@ -550,7 +567,8 @@ class MainWindow(QMainWindow, Ui_Redminer):
         end_date = self.ui.dateEdit_end.date().toPyDate()
         step_date = int(self.slider_value)
         
-        self.issue_journals_inst = Issue_Journals_Handler.Filter_Issue_Journals(self.current_project_id, 
+        self.issue_journals_inst = Issue_Journals_Handler.Filter_Issue_Journals(
+                                                                                self.current_project_id, 
                                                                                 self.current_project_name, 
                                                                                 start_date, 
                                                                                 end_date, 
@@ -581,11 +599,16 @@ class MainWindow(QMainWindow, Ui_Redminer):
         MyPrint(message, level = "NORMAL")
         self.print_to_console(message)
         self.__enable_preference_panel()
-        self.__enable_filter_panel()
         self.__enable_control_panel()
         self.__enable_loading_panel()
         self.__enable_menu()
-          
+        self.__enable_filter_panel()
+        
+        if self.category_dict and self.category_dict != 'INVALID':
+            self.ui.pushButton_category_select.setEnabled(True)
+        else:
+            self.ui.pushButton_category_select.setEnabled(False)
+                      
         last_cache_time = check_cache(self.current_project_name)  
             
         if last_cache_time:
@@ -651,29 +674,7 @@ class MainWindow(QMainWindow, Ui_Redminer):
                                    [self.status_name_list, self.status_id_list], 
                                    selection_names
                                    )
-        
-    @pyqtSignature("")
-    def on_pushButton_category_select_clicked(self):
-        print ">>> on_pushButton_category_select_clicked"
-        
-        self.category_name_list = self.category_dict.values()
-        self.category_id_list = self.category_dict.keys()
-        
-        attribute_title = "Category"
-        attribute_name = "%s_Name" %(attribute_title)
 
-        if attribute_name in self.attribute_select_dict.keys():
-            selection_names = self.attribute_select_dict[attribute_name]
-        else:
-            selection_names = []
-            
-        self.show_selection_dialog(attribute_title, 
-                                   len(self.category_dict), 
-                                   2, 
-                                   [self.category_name_list, self.category_id_list], 
-                                   selection_names
-                                   )
- 
     @pyqtSignature("")
     def on_pushButton_severity_select_clicked(self):
         print ">>> on_pushButton_severity_select_clicked"
@@ -695,7 +696,59 @@ class MainWindow(QMainWindow, Ui_Redminer):
                                    1, 
                                    [self.severity_list], 
                                    selection_names)
+
+    @pyqtSignature("")
+    def on_pushButton_category_select_clicked(self):
+        print ">>> on_pushButton_category_select_clicked"
+
+        if not self.category_dict:
+            return
+       
+        print 'self.category_dict-->', self.category_dict
+       
+        self.category_name_list = self.category_dict.values()
+        self.category_id_list = self.category_dict.keys()
         
+        attribute_title = "Category"
+        attribute_name = "%s_Name" %(attribute_title)
+
+        if attribute_name in self.attribute_select_dict.keys():
+            selection_names = self.attribute_select_dict[attribute_name]
+        else:
+            selection_names = []
+            
+        self.show_selection_dialog(attribute_title, 
+                                   len(self.category_dict), 
+                                   2, 
+                                   [self.category_name_list, self.category_id_list], 
+                                   selection_names
+                                   )
+        
+
+    @pyqtSignature("")
+    def on_pushButton_tracker_select_clicked(self):     # NEW
+        print ">>> on_pushButton_tracker_select_clicked"
+        
+        if not self.tracker_dict:
+            return
+
+        self.tracker_name_list = self.tracker_dict.values()
+        self.tracker_id_list = self.tracker_dict.keys()
+
+        attribute_title = "Tracker"
+        attribute_name = "%s_Name" %(attribute_title)
+
+        if attribute_name in self.attribute_select_dict.keys():
+            selection_names = self.attribute_select_dict[attribute_name]
+        else:
+            selection_names = []
+
+        self.show_selection_dialog(
+                                   attribute_title, 
+                                   len(self.tracker_dict), 
+                                   2, 
+                                   [self.tracker_name_list, self.tracker_id_list], 
+                                   selection_names)
 
     def show_selection_dialog(self, attribute_title, rows, columns, content_matrix, check_text_list):
         self.attribute_title = "%s" %(attribute_title)
@@ -743,7 +796,7 @@ class MainWindow(QMainWindow, Ui_Redminer):
         
         attribute_ready_counter = 0
         
-        if self.status_dict:
+        if self.status_dict and self.status_dict != 'INVALID':
             if "Status_Name" in self.attribute_select_dict.keys():
                 attribute_ready_counter = attribute_ready_counter + 1
                 self.ui.pushButton_status_switch.setIcon(QtGui.QIcon(self.icon_check))
@@ -755,7 +808,8 @@ class MainWindow(QMainWindow, Ui_Redminer):
             self.ui.pushButton_status_switch.setIcon(QtGui.QIcon(self.icon_ban))
             self.ui.pushButton_status_select.setEnabled(False)
         
-        if self.category_dict != 'INVALID':
+        # FIX ME
+        if self.category_dict and self.category_dict != 'INVALID':
             if "Category_Name" in self.attribute_select_dict.keys():
                 attribute_ready_counter = attribute_ready_counter + 1
                 self.ui.pushButton_category_switch.setIcon(QtGui.QIcon(self.icon_check))
@@ -766,8 +820,20 @@ class MainWindow(QMainWindow, Ui_Redminer):
             attribute_ready_counter = attribute_ready_counter + 1
             self.ui.pushButton_category_switch.setIcon(QtGui.QIcon(self.icon_ban))
             self.ui.pushButton_category_select.setEnabled(False)
-            
-        if self.severity_list:        
+    
+        if self.tracker_dict and self.tracker_dict != 'INVALID':        
+            if "Tracker_Name" in self.attribute_select_dict.keys():
+                attribute_ready_counter = attribute_ready_counter + 1
+                self.ui.pushButton_tracker_switch.setIcon(QtGui.QIcon(self.icon_check))
+            else:
+                self.ui.pushButton_tracker_switch.setIcon(QtGui.QIcon(self.icon_pending))
+
+        else:
+            attribute_ready_counter = attribute_ready_counter + 1
+            self.ui.pushButton_tracker_switch.setIcon(QtGui.QIcon(self.icon_ban))
+            self.ui.pushButton_tracker_select.setEnabled(False)
+      
+        if self.severity_list and self.severity_list != 'INVALID':        
             if "Severity_Name" in self.attribute_select_dict.keys():
                 attribute_ready_counter = attribute_ready_counter + 1
                 self.ui.pushButton_severity_switch.setIcon(QtGui.QIcon(self.icon_check))
@@ -779,7 +845,8 @@ class MainWindow(QMainWindow, Ui_Redminer):
             self.ui.pushButton_severity_switch.setIcon(QtGui.QIcon(self.icon_ban))
             self.ui.pushButton_severity_select.setEnabled(False)
             
-        if attribute_ready_counter == 3:
+            
+        if attribute_ready_counter == 4:
             self.__enable_control_panel()
 
     @pyqtSignature("")
