@@ -12,7 +12,7 @@ from PyQt4 import QtGui, QtCore
 #Bigger number means more serious
 EventLevel = {'NORMAL':0 ,'DEBUG': 1, 'ERROR': 3, 'FATAL': 4}
 
-MinLevel = 'ERROR'
+MinLevel = 'NORMAL'
 
 # Four levels for log recording
 # Level-1:NORMAL

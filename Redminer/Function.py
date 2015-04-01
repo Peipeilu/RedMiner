@@ -368,7 +368,7 @@ def request_issue_journals(issue_num, personal_key):    #FIXME BELOW
                     
                 MyPrint( "(%s) Category | old -> new : %s -> %s" %(created_time, old_value_category, new_value_category), level='DEBUG')
 
-            elif tracker_scan and (detail.get('name') == "tracker_id" or detail.get('name') == "1"):
+            elif tracker_scan and (detail.get('name') == "tracker_id"):
                 
                 old_value_tracker = detail.find('old_value').text if detail.find('old_value').text else "Not Defined"
                 new_value_tracker = detail.find('new_value').text if detail.find('new_value').text else "Not Defined"
@@ -774,7 +774,7 @@ if __name__ == '__main__':
 #     __request_issue_list(project_num=292 , offset_num=100, personal_key="92a0618f19ec413438e4b5b3a3847ce1cd88c67a" )
 #     print build_issue_journals_for_project(292, "92a0618f19ec413438e4b5b3a3847ce1cd88c67a",300)
 #     print request_category_dict(291, "92a0618f19ec413438e4b5b3a3847ce1cd88c67a")
-    print request_issue_journals(31111, API_Key)
+    print request_issue_journals(9676, API_Key)
     
 #     request_tracker_dict(API_Key)
     

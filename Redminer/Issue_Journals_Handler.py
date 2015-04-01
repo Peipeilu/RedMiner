@@ -212,7 +212,7 @@ class Filter_Issue_Journals(QtCore.QThread):
         
         for select_datetime in date_list:
             counter = [0]*7
-            issues_S1 = []
+            debug_list = []
             
             for key,value in self.issue_journals_dict.iteritems():
                 issue = key
@@ -242,7 +242,6 @@ class Filter_Issue_Journals(QtCore.QThread):
     
                 if   last_severity_name == "S1":
                     counter[1] = counter[1] + 1
-                    issues_S1.append(issue) # For Debugging
                     
                 elif last_severity_name == "S2":
                     counter[2] = counter[2] + 1
@@ -256,14 +255,17 @@ class Filter_Issue_Journals(QtCore.QThread):
                 elif last_severity_name == "S5":                
                     counter[5] = counter[5] + 1
 
-                else:   #For Undefined severity
+                elif last_severity_name == "Not Defined":   #For Undefined severity
                     counter[6] = counter[6] + 1
-#                     print "last_severity_name-->",last_severity_name, type(last_severity_name)
+                    debug_list.append(issue) # For Debugging
+                
+                else:
+                    print "last_severity_name-->",last_severity_name, type(last_severity_name)
                         
 #             print "[%s] | S1:%d | S2:%d | S3:%d | S4:%d | S5:%d | SUM:%d | issues_S5:%s" %(select_datetime, counter[1], counter[2], counter[3], counter[4], counter[5], counter[0] , issues_S5)
 #             print "[%s] | S1:%d | S2:%d | S3:%d | S4:%d | S5:%d | SUM:%d | issue_closed:%s" %(select_datetime, counter[1], counter[2], counter[3], counter[4], counter[5], counter[0] , issue_closed)
-            print "[%s] | S1:%d | S2:%d | S3:%d | S4:%d | S5:%d | Not Defined:%d | SUM:%d | issues_S1:%s" %(
-                  select_datetime, counter[1], counter[2], counter[3], counter[4], counter[5],counter[6], counter[0], issues_S1)
+            print "[%s] | S1:%d | S2:%d | S3:%d | S4:%d | S5:%d | Not Defined:%d | SUM:%d | Not Defined:%s" %(
+                  select_datetime, counter[1], counter[2], counter[3], counter[4], counter[5],counter[6], counter[0], debug_list)
              
             content_list = [str(counter[index]) for index in range(len(severity_name_selection) + 1)]
             content_list.insert(0, str(select_datetime))

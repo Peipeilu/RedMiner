@@ -332,6 +332,13 @@ class MainWindow(QMainWindow, Ui_Redminer):
                 self.ui.textEdit_lastCopyTime.setText(str(last_cache_time))
                 self.ui.checkBox_source.setCheckState(Qt.Unchecked)
                 self.ui.checkBox_source.setEnabled(True)
+                
+                # FIX ME
+                # self.ui.dateEdit_end.setMaximumDate(QtCore.QDate.fromString(today,"yyyy-MM-dd")) # 2015-03-31 11:20:21 
+                self.ui.dateEdit_start.setMaximumDate(QtCore.QDate.fromString(str(last_cache_time.date()),"yyyy-MM-dd"))
+                self.ui.dateEdit_end.setDate(QtCore.QDate.fromString(str(last_cache_time.date()),"yyyy-MM-dd"))
+                self.ui.dateEdit_end.setMaximumDate(QtCore.QDate.fromString(str(last_cache_time.date()),"yyyy-MM-dd"))
+                
             else:
                 self.ui.textEdit_lastCopyTime.setText("N/A")
                 self.ui.checkBox_source.setCheckState(Qt.Unchecked)
@@ -475,7 +482,6 @@ class MainWindow(QMainWindow, Ui_Redminer):
                         self.ui.checkBox_source.setCheckState(Qt.Unchecked)
                         self.__disable_loading_panel()
                         self.ui.pushButton_project_load.setEnabled(True)
-                        #FIX ME
                         
             else:
                 message = "The local data copy was generated at least one week before.\nDo you want to download newest data from server again?"
@@ -499,7 +505,7 @@ class MainWindow(QMainWindow, Ui_Redminer):
     def start_creating_issue_journal(self):     
         self.issue_journals_inst = Issue_Journals_Handler.Create_Issue_Journals(self.current_project_id, self.current_project_name, self.personal_key)
         self.issue_journals_inst.start()
-        self.issue_journals_inst.send_results.connect(self.on_send_results) # on_send_complete
+        self.issue_journals_inst.send_results.connect(self.on_send_results)
         self.issue_journals_inst.send_message.connect(self.on_send_message)
         self.issue_journals_inst.send_stop.connect(self.on_termiate_message)
         self.issue_journals_inst.update_message.connect(self.on_update_message)
@@ -518,14 +524,45 @@ class MainWindow(QMainWindow, Ui_Redminer):
     @QtCore.pyqtSlot()
     def on_journal_load_complate(self):
         self.__enable_loading_panel()
+         
+#         if self.category_dict and self.category_dict != 'INVALID':
+#             self.ui.pushButton_category_select.setEnabled(True)
+#         else:
+#             self.ui.pushButton_category_select.setEnabled(False)
+         
+        last_cache_time = check_cache(self.current_project_name)  
+         
+#         MyPrint ("current_project_name-->%s"%(self.current_project_name))
+#         MyPrint ("last_cache_time-->%s"%(last_cache_time))
+             
+        if last_cache_time:
+            self.ui.textEdit_lastCopyTime.setText(str(last_cache_time))
+            
+            self.ui.dateEdit_start.setMaximumDate(QtCore.QDate.fromString(str(last_cache_time.date()),"yyyy-MM-dd"))
+            self.ui.dateEdit_end.setMaximumDate(QtCore.QDate.fromString(str(last_cache_time.date()),"yyyy-MM-dd"))
+            self.ui.dateEdit_end.setDate(QtCore.QDate.fromString(str(last_cache_time.date()),"yyyy-MM-dd"))
+            
+#             MyPrint ("last_cache_time-->%s"%(last_cache_time))
+#             print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            
+            self.ui.checkBox_source.setCheckState(Qt.Unchecked)
+            self.ui.checkBox_source.setEnabled(True)
+        else:
+            self.ui.textEdit_lastCopyTime.setText("N/A")
+            self.ui.checkBox_source.setCheckState(Qt.Unchecked)
+            self.ui.checkBox_source.setEnabled(False)
+         
+        self.ui.pushButton_result.setEnabled(True)
     
     def __on_processing_results(self, results):
         self.issue_journals_dict = results
         start_date_string = search_start_datetime(self.issue_journals_dict)
         
-        today = time.strftime('%Y-%m-%d',time.localtime(time.time()))
         if start_date_string:
             self.ui.dateEdit_start.setDate(QtCore.QDate.fromString(start_date_string,"yyyy-MM-dd"))
+        
+        today = time.strftime('%Y-%m-%d',time.localtime(time.time()))
+        # FIX ME
         if today:
             self.ui.dateEdit_end.setDate(QtCore.QDate.fromString(today,"yyyy-MM-dd"))
         
@@ -543,7 +580,7 @@ class MainWindow(QMainWindow, Ui_Redminer):
     def on_termiate_message(self, message):
         self.issue_journals_inst = None
         self.print_to_console(message)
-        #FIX ME
+
         self.__enable_menu()
         self.__switch_pushButton_project_load()  
         self.__enable_loading_panel()
@@ -567,7 +604,7 @@ class MainWindow(QMainWindow, Ui_Redminer):
         end_date = self.ui.dateEdit_end.date().toPyDate()
         step_date = int(self.slider_value)
         
-        self.issue_journals_inst = Issue_Journals_Handler.Filter_Issue_Journals(
+        self.issue_filter_inst = Issue_Journals_Handler.Filter_Issue_Journals(
                                                                                 self.current_project_id, 
                                                                                 self.current_project_name, 
                                                                                 start_date, 
@@ -577,12 +614,12 @@ class MainWindow(QMainWindow, Ui_Redminer):
                                                                                 self.issue_journals_dict, 
                                                                                 self.personal_key
                                                                                 )
-        self.issue_journals_inst.start()
-        self.issue_journals_inst.send_message.connect(self.on_send_message)
-        self.issue_journals_inst.update_message.connect(self.on_update_message)
-        self.issue_journals_inst.send_stop.connect(self.on_stop_message)
-        self.issue_journals_inst.send_complete.connect(self.on_complete_message)
-        self.issue_journals_inst.send_result_path.connect(self.on_result_path)
+        self.issue_filter_inst.start()
+        self.issue_filter_inst.send_message.connect(self.on_send_message)
+        self.issue_filter_inst.update_message.connect(self.on_update_message)
+        self.issue_filter_inst.send_stop.connect(self.on_stop_message)
+        self.issue_filter_inst.send_complete.connect(self.on_complete_message)
+        self.issue_filter_inst.send_result_path.connect(self.on_result_path)
         
     @QtCore.pyqtSlot(str)
     def on_result_path(self, message):
@@ -595,22 +632,26 @@ class MainWindow(QMainWindow, Ui_Redminer):
         self.print_to_console(message)
 
     @QtCore.pyqtSlot(str)
-    def on_complete_message(self, message):
+    def on_complete_message(self, message):  
         MyPrint(message, level = "NORMAL")
         self.print_to_console(message)
+         
         self.__enable_preference_panel()
         self.__enable_control_panel()
         self.__enable_loading_panel()
         self.__enable_menu()
         self.__enable_filter_panel()
-        
+         
         if self.category_dict and self.category_dict != 'INVALID':
             self.ui.pushButton_category_select.setEnabled(True)
         else:
             self.ui.pushButton_category_select.setEnabled(False)
-                      
+         
         last_cache_time = check_cache(self.current_project_name)  
-            
+         
+        MyPrint ("current_project_name-->%s"%(self.current_project_name))
+        MyPrint ("last_cache_time-->%s"%(last_cache_time))
+             
         if last_cache_time:
             self.ui.textEdit_lastCopyTime.setText(str(last_cache_time))
             self.ui.checkBox_source.setCheckState(Qt.Unchecked)
@@ -619,9 +660,9 @@ class MainWindow(QMainWindow, Ui_Redminer):
             self.ui.textEdit_lastCopyTime.setText("N/A")
             self.ui.checkBox_source.setCheckState(Qt.Unchecked)
             self.ui.checkBox_source.setEnabled(False)
-        
+         
         self.ui.pushButton_result.setEnabled(True)
-        
+         
         self.mutex.unlock()
         
     @QtCore.pyqtSlot(str)
@@ -808,7 +849,6 @@ class MainWindow(QMainWindow, Ui_Redminer):
             self.ui.pushButton_status_switch.setIcon(QtGui.QIcon(self.icon_ban))
             self.ui.pushButton_status_select.setEnabled(False)
         
-        # FIX ME
         if self.category_dict and self.category_dict != 'INVALID':
             if "Category_Name" in self.attribute_select_dict.keys():
                 attribute_ready_counter = attribute_ready_counter + 1
